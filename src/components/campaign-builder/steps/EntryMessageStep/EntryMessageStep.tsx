@@ -1,0 +1,480 @@
+"use client";
+
+import {
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  useForm,
+  useWatch,
+  type SubmitHandler,
+} from "react-hook-form";
+
+import {
+  zodResolver,
+} from "@hookform/resolvers/zod";
+
+import AddLinkDialog, {
+  type AddedLink,
+} from "../../AddLinkDialog";
+
+import EntryMessageFooter from "./EntryMessageFooter";
+import MessageEditor, {
+  type MessageVariable,
+} from "./MessageEditor";
+import MessagePreview from "./MessagePreview";
+
+import {
+  entryMessageSaved,
+  nextStep,
+  previousStep,
+  selectEntryMessage,
+} from "@/lib/features/campaign-builder/campaignBuilderSlice";
+
+import {
+  entryMessageSchema,
+  type EntryMessageFormValues,
+} from "@/lib/features/campaign-builder/entryMessageSchema";
+
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "@/lib/hooks";
+
+import { cn } from "@/lib/utils";
+
+const DEFAULT_LINK_URL =
+  "https://www.atrmajlesi.ir";
+
+const previewCustomer = {
+  firstName: "سعید",
+  lastName: "طباطبایی",
+  clubName: "عطر مجلسی",
+  points: "۱۲۰",
+  credit: "۵۰۰٬۰۰۰ تومان",
+  userLevel: "طلایی",
+} as const;
+
+const messageVariables: readonly MessageVariable[] = [
+  {
+    id: "credit",
+    label: "اعتبار",
+    token: "{{credit}}",
+  },
+  {
+    id: "userLevel",
+    label: "سطح کاربری",
+    token: "{{userLevel}}",
+  },
+  {
+    id: "clubName",
+    label: "نام مجموعه",
+    token: "{{clubName}}",
+  },
+  {
+    id: "firstName",
+    label: "نام",
+    token: "{{firstName}}",
+  },
+  {
+    id: "lastName",
+    label: "نام خانوادگی",
+    token: "{{lastName}}",
+  },
+  {
+    id: "points",
+    label: "امتیاز",
+    token: "{{points}}",
+  },
+];
+
+function createDefaultMessage(): string {
+  return `سلام ${previewCustomer.firstName} عزیز
+ورود شما را به باشگاه مشتریان ${previewCustomer.clubName} تبریک می‌گوییم
+امتیاز شما در باشگاه ما: ${previewCustomer.points}
+${DEFAULT_LINK_URL}
+لغو11`;
+}
+
+function createPreviewMessage(
+  message: string,
+  linkUrl: string,
+): string {
+  const values: Record<string, string> = {
+    firstName: previewCustomer.firstName,
+    lastName: previewCustomer.lastName,
+    clubName: previewCustomer.clubName,
+    points: previewCustomer.points,
+    credit: previewCustomer.credit,
+    userLevel: previewCustomer.userLevel,
+    link:
+      linkUrl ||
+      DEFAULT_LINK_URL,
+  };
+
+  const source =
+    message.trim() ||
+    createDefaultMessage();
+
+  return source.replace(
+    /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g,
+    (
+      originalToken: string,
+      variableName: string,
+    ) =>
+      values[variableName] ??
+      originalToken,
+  );
+}
+
+export default function EntryMessageStep() {
+  const dispatch =
+    useAppDispatch();
+
+  const savedEntryMessage =
+    useAppSelector(
+      selectEntryMessage,
+    );
+
+  const [
+    isPreviewOpen,
+    setIsPreviewOpen,
+  ] = useState(true);
+
+  const [
+    isLinkDialogOpen,
+    setIsLinkDialogOpen,
+  ] = useState(false);
+
+  const {
+    control,
+    handleSubmit,
+    getValues,
+    setValue,
+    clearErrors,
+
+    formState: {
+      errors,
+    },
+  } = useForm<EntryMessageFormValues>({
+    resolver: zodResolver(
+      entryMessageSchema,
+    ),
+
+    mode: "onBlur",
+
+    defaultValues: {
+      isEnabled:
+        savedEntryMessage.isEnabled ??
+        true,
+
+      senderLineId:
+        savedEntryMessage.senderLineId ||
+        "1000000000",
+
+      message:
+        savedEntryMessage.message ||
+        createDefaultMessage(),
+
+      linkUrl:
+        savedEntryMessage.linkUrl ||
+        DEFAULT_LINK_URL,
+
+      uniqueLinkPerCustomer:
+        savedEntryMessage
+          .uniqueLinkPerCustomer ??
+        false,
+    },
+  });
+
+  const isEnabled =
+    useWatch({
+      control,
+      name: "isEnabled",
+    }) ?? false;
+
+  const message =
+    useWatch({
+      control,
+      name: "message",
+    }) ?? "";
+
+  const linkUrl =
+    useWatch({
+      control,
+      name: "linkUrl",
+    }) ?? DEFAULT_LINK_URL;
+
+  const uniqueLinkPerCustomer =
+    useWatch({
+      control,
+      name:
+        "uniqueLinkPerCustomer",
+    }) ?? false;
+
+  const previewMessage =
+    useMemo(
+      () =>
+        createPreviewMessage(
+          message,
+          linkUrl,
+        ),
+      [
+        message,
+        linkUrl,
+      ],
+    );
+
+  const handleValidSubmit:
+    SubmitHandler<
+      EntryMessageFormValues
+    > = (values) => {
+      dispatch(
+        entryMessageSaved(
+          values,
+        ),
+      );
+
+      dispatch(nextStep());
+    };
+
+  function handleSaveDraft() {
+    dispatch(
+      entryMessageSaved(
+        getValues(),
+      ),
+    );
+  }
+
+  function handlePrevious() {
+    dispatch(previousStep());
+  }
+
+  function insertTokenIntoMessage(
+    token: string,
+  ) {
+    const currentMessage =
+      getValues("message") ?? "";
+
+    const needsSpace =
+      currentMessage.length > 0 &&
+      !currentMessage.endsWith(
+        " ",
+      ) &&
+      !currentMessage.endsWith(
+        "\n",
+      );
+
+    setValue(
+      "message",
+      currentMessage +
+        (needsSpace ? " " : "") +
+        token,
+      {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      },
+    );
+  }
+
+function handleAiRewrite() {
+  const currentLink =
+    getValues("linkUrl") ||
+    DEFAULT_LINK_URL;
+
+  const rewrittenMessage = `سلام ${previewCustomer.firstName} عزیز
+ورود شما را به باشگاه مشتریان ${previewCustomer.clubName} تبریک می‌گوییم
+امتیاز شما در باشگاه ما: ${previewCustomer.points}
+${currentLink}
+لغو11`;
+
+  setValue(
+    "message",
+    rewrittenMessage,
+    {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    },
+  );
+}
+
+function handleAddLink(
+  addedLink: AddedLink,
+) {
+  const newUrl = addedLink.url.trim();
+
+  const oldUrl =
+    getValues("linkUrl")?.trim() ?? "";
+
+  const currentMessage =
+    getValues("message") ?? "";
+
+  let nextMessage = currentMessage;
+
+  if (nextMessage.includes("{{link}}")) {
+    nextMessage = nextMessage.replaceAll(
+      "{{link}}",
+      newUrl,
+    );
+  } else if (
+    oldUrl &&
+    nextMessage.includes(oldUrl)
+  ) {
+    nextMessage = nextMessage.replaceAll(
+      oldUrl,
+      newUrl,
+    );
+  } else {
+    const separator =
+      nextMessage.length > 0 &&
+      !nextMessage.endsWith("\n")
+        ? "\n"
+        : "";
+
+    nextMessage =
+      `${nextMessage}${separator}${newUrl}`;
+  }
+
+  setValue("linkUrl", newUrl, {
+    shouldDirty: true,
+    shouldTouch: true,
+    shouldValidate: true,
+  });
+
+  setValue(
+    "uniqueLinkPerCustomer",
+    addedLink.uniquePerCustomer,
+    {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    },
+  );
+
+  setValue("message", nextMessage, {
+    shouldDirty: true,
+    shouldTouch: true,
+    shouldValidate: true,
+  });
+
+  setIsLinkDialogOpen(false);
+}
+
+  return (
+    <>
+      <form
+        onSubmit={handleSubmit(
+          handleValidSubmit,
+        )}
+        noValidate
+        className={cn(
+          /*
+           * Parent campaign header is 119px.
+           * 1382 - 119 = 1263px.
+           */
+          "relative",
+          "h-[1263px]",
+          "w-full",
+          "bg-white",
+        )}
+      >
+        <main
+          className={cn(
+            /*
+             * Figma content:
+             * 999 × 1186
+             * padding-top: 64px
+             * horizontal padding: 100px
+             */
+            "h-[1186px]",
+            "w-full",
+            "px-6 pt-16",
+            "lg:px-[100px]",
+          )}
+        >
+          <div
+            className={cn(
+              "mx-auto flex",
+              "h-[1122px]",
+              "w-full",
+              "max-w-[799px]",
+              "flex-col",
+              "gap-8",
+            )}
+          >
+            <MessageEditor
+              control={control}
+              errors={errors}
+              clearErrors={
+                clearErrors
+              }
+              isEnabled={
+                isEnabled
+              }
+              message={
+                message
+              }
+              variables={
+                messageVariables
+              }
+              onInsertToken={
+                insertTokenIntoMessage
+              }
+              onOpenLinkDialog={() => {
+                setIsLinkDialogOpen(
+                  true,
+                );
+              }}
+              onAiRewrite={
+                handleAiRewrite
+              }
+            />
+
+            <MessagePreview
+              isOpen={
+                isPreviewOpen
+              }
+              isEnabled={
+                isEnabled
+              }
+              message={
+                previewMessage
+              }
+              onToggle={() => {
+                setIsPreviewOpen(
+                  (current) =>
+                    !current,
+                );
+              }}
+            />
+          </div>
+        </main>
+
+        <EntryMessageFooter
+          onPrevious={
+            handlePrevious
+          }
+          onSaveDraft={
+            handleSaveDraft
+          }
+        />
+      </form>
+
+      <AddLinkDialog
+  open={isLinkDialogOpen}
+  initialUrl={
+    linkUrl ||
+    "https://www.atrmajlesi.ir"
+  }
+  initialUniquePerCustomer={
+    uniqueLinkPerCustomer
+  }
+  onOpenChange={setIsLinkDialogOpen}
+  onAddLink={handleAddLink}
+/>
+    </>
+  );
+}
