@@ -592,10 +592,10 @@ export default function MessageEditor({
               placeholder="متن پیام را بنویسید"
               maxLength={MAX_MESSAGE_LENGTH}
               className={cn(
-                "h-[240px]",
-                "min-h-[240px]",
+                "h-60",
+                "min-h-60",
                 "w-full resize-none",
-                "rounded-[16px]",
+                "rounded-2xl",
                 "border-2 bg-white",
                 "px-6 pb-12 pt-4",
                 "text-right",
