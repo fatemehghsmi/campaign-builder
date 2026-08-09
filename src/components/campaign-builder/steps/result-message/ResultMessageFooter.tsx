@@ -16,9 +16,9 @@ export default function ResultMessageFooter({
     <footer
       dir="ltr"
       className={cn(
-        "sticky bottom-0 z-30 flex h-[77px] w-full items-center",
+        "sticky bottom-0 z-30 flex h-19.25 w-full items-center",
         "justify-between border-t border-[#EBEBEB] bg-white px-6",
-        "lg:px-[100px]",
+        "lg:px-25",
       )}
     >
       <Button
@@ -36,7 +36,7 @@ export default function ResultMessageFooter({
           variant="outline"
           onClick={onPrevious}
           className={cn(
-            "h-12 min-w-44 rounded-[16px] border-[#DEDEDE]",
+            "h-12 min-w-44 rounded-2xl border-[#DEDEDE]",
             "bg-white text-[#555] shadow-none hover:bg-[#FAFAFA]",
           )}
         >
@@ -46,7 +46,7 @@ export default function ResultMessageFooter({
         <Button
           type="submit"
           className={cn(
-            "h-12 min-w-44 rounded-[16px] bg-[#F38353]",
+            "h-12 min-w-44 rounded-2xl bg-[#F38353]",
             "font-bold text-white shadow-none hover:bg-[#ED6D36]",
           )}
         >

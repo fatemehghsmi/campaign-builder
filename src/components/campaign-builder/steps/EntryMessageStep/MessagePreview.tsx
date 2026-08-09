@@ -37,11 +37,12 @@ function PhonePreview({
 }: PhonePreviewProps) {
   const lines = message.split(/\r?\n/);
 
+  const newLocal = "size-2.75";
   return (
     <div
       className={cn(
         "relative",
-        "h-[478px]",
+        "h-119.5",
         "w-full",
         "overflow-hidden",
       )}
@@ -50,9 +51,9 @@ function PhonePreview({
       <div
         className={cn(
           "absolute",
-          "left-1/2 top-[28px]",
-          "h-[780px]",
-          "w-[440px]",
+          "left-1/2 top-7",
+          "h-195",
+          "w-110",
           "max-w-[calc(100%-32px)]",
           "-translate-x-1/2",
           "rounded-[78px]",
@@ -66,10 +67,10 @@ function PhonePreview({
           aria-hidden="true"
           className={cn(
             "absolute",
-            "-left-[5px]",
-            "top-[177px]",
-            "h-[46px] w-[5px]",
-            "rounded-l-[4px]",
+            "-left-1.25",
+            "top-44.25",
+            "h-11.5 w-1.25",
+            "rounded-l-sm",
             "bg-[#666]",
           )}
         />
@@ -78,10 +79,10 @@ function PhonePreview({
           aria-hidden="true"
           className={cn(
             "absolute",
-            "-left-[5px]",
-            "top-[246px]",
-            "h-[72px] w-[5px]",
-            "rounded-l-[4px]",
+            "-left-1.25",
+            "top-61.5",
+            "h-18 w-1.25",
+            "rounded-l-sm",
             "bg-[#666]",
           )}
         />
@@ -90,10 +91,10 @@ function PhonePreview({
           aria-hidden="true"
           className={cn(
             "absolute",
-            "-left-[5px]",
-            "top-[332px]",
-            "h-[72px] w-[5px]",
-            "rounded-l-[4px]",
+            "-left-1.25",
+            "top-83",
+            "h-18 w-1.25",
+            "rounded-l-sm",
             "bg-[#666]",
           )}
         />
@@ -103,10 +104,10 @@ function PhonePreview({
           aria-hidden="true"
           className={cn(
             "absolute",
-            "-right-[5px]",
-            "top-[245px]",
-            "h-[112px] w-[5px]",
-            "rounded-r-[4px]",
+            "-right-1.25",
+            "top-61.25",
+            "h-28 w-1.25",
+            "rounded-r-sm",
             "bg-[#666]",
           )}
         />
@@ -117,7 +118,7 @@ function PhonePreview({
             "h-full w-full",
             "rounded-[74px]",
             "bg-[#090909]",
-            "p-[6px]",
+            "p-1.5",
           )}
         >
           {/* Screen */}
@@ -137,10 +138,10 @@ function PhonePreview({
               className={cn(
                 "absolute inset-x-0 top-0",
                 "z-30",
-                "flex h-[66px]",
+                "flex h-16.5",
                 "items-center",
                 "justify-between",
-                "px-[48px]",
+                "px-12",
                 "text-[17px]",
                 "font-semibold",
                 "text-black",
@@ -151,25 +152,25 @@ function PhonePreview({
               <div
                 className={cn(
                   "flex items-center",
-                  "gap-[7px]",
+                  "gap-1.75",
                 )}
               >
                 {/* Signal */}
-                <span className="flex h-[14px] items-end gap-[2px]">
-                  <span className="h-[5px] w-[3px] rounded-sm bg-black" />
-                  <span className="h-[8px] w-[3px] rounded-sm bg-black" />
-                  <span className="h-[11px] w-[3px] rounded-sm bg-black" />
-                  <span className="h-[14px] w-[3px] rounded-sm bg-black" />
+                <span className="flex h-3.5 items-end gap-0.5">
+                  <span className="h-1.25 w-0.75 rounded-sm bg-black" />
+                  <span className="h-2 w-0.75 rounded-sm bg-black" />
+                  <span className="h-2.75 w-0.75 rounded-sm bg-black" />
+                  <span className="h-3.5 w-0.75 rounded-sm bg-black" />
                 </span>
 
                 <Wifi
                   strokeWidth={2.4}
-                  className="h-[15px] w-[19px]"
+                  className="h-3.75 w-4.75"
                 />
 
                 <BatteryFull
                   strokeWidth={2}
-                  className="h-[16px] w-[29px]"
+                  className="h-4 w-7.25"
                 />
               </div>
             </div>
@@ -179,9 +180,9 @@ function PhonePreview({
               aria-hidden="true"
               className={cn(
                 "absolute",
-                "left-1/2 top-[12px]",
+                "left-1/2 top-3",
                 "z-40",
-                "h-[35px] w-[122px]",
+                "h-8.75 w-30.5",
                 "-translate-x-1/2",
                 "rounded-full",
                 "bg-black",
@@ -190,8 +191,8 @@ function PhonePreview({
               <span
                 className={cn(
                   "absolute",
-                  "right-[11px] top-1/2",
-                  "size-[11px]",
+                  "right-2.75 top-1/2",
+                  newLocal,
                   "-translate-y-1/2",
                   "rounded-full",
                   "bg-[#061224]",
@@ -207,10 +208,10 @@ function PhonePreview({
               onClick={onClose}
               className={cn(
                 "absolute",
-                "left-[29px]",
-                "top-[91px]",
+                "left-7.25",
+                "top-22.75",
                 "z-30",
-                "flex size-[46px]",
+                "flex size-11.5",
                 "items-center",
                 "justify-center",
                 "rounded-full",
@@ -231,9 +232,9 @@ function PhonePreview({
             <div
               className={cn(
                 "absolute",
-                "left-1/2 top-[88px]",
+                "left-1/2 top-22",
                 "z-20",
-                "size-[68px]",
+                "size-17",
                 "-translate-x-1/2",
                 "overflow-hidden",
                 "rounded-full",
@@ -251,10 +252,10 @@ function PhonePreview({
             <div
               className={cn(
                 "absolute",
-                "left-1/2 top-[148px]",
+                "left-1/2 top-37",
                 "z-30",
-                "flex h-[48px]",
-                "w-[124px]",
+                "flex h-12",
+                "w-31",
                 "-translate-x-1/2",
                 "items-center",
                 "justify-center",
@@ -273,16 +274,16 @@ function PhonePreview({
             <div
               className={cn(
                 "absolute",
-                "right-[48px]",
-                "top-[226px]",
-                "h-[218px]",
-                "w-[292px]",
+                "right-12",
+                "top-56.5",
+                "h-54.5",
+                "w-73",
                 "rounded-[30px]",
                 "bg-[#DEDEDE]",
-                "px-6 py-[18px]",
+                "px-6 py-4.5",
                 "text-[17px]",
                 "font-normal",
-                "leading-[24px]",
+                "leading-6",
                 "text-black",
               )}
             >
@@ -290,7 +291,7 @@ function PhonePreview({
                 className={cn(
                   "h-full",
                   "overflow-y-auto",
-                  "[scrollbar-width:none]",
+                  "scrollbar-none",
                   "[&::-webkit-scrollbar]:hidden",
                 )}
               >
@@ -303,9 +304,9 @@ function PhonePreview({
                       dir={link ? "ltr" : "rtl"}
                       className={cn(
                         "block",
-                        "min-h-[24px]",
+                        "min-h-6",
                         "w-full",
-                        "break-words",
+                        "wrap-break-word",
 
                         link
                           ? "text-left text-[#0088FF]"
@@ -323,10 +324,10 @@ function PhonePreview({
                 aria-hidden="true"
                 className={cn(
                   "absolute",
-                  "-left-[14px]",
+                  "-left-3.5",
                   "bottom-0",
-                  "h-[38px]",
-                  "w-[24px]",
+                  "h-9.5",
+                  "w-6",
                   "bg-[#DEDEDE]",
                 )}
                 style={{
@@ -356,14 +357,14 @@ export default function MessagePreview({
         "flex-col",
         "items-center",
         "overflow-hidden",
-        "rounded-[16px]",
+        "rounded-2xl",
         "border-2",
         "border-[#EBEBEB]",
         "bg-[#F7F7F7]",
 
         isOpen
-          ? "h-[553px]"
-          : "h-[75px]",
+          ? "h-138.25"
+          : "h-18.75",
       )}
     >
       {/* Header */}
@@ -372,7 +373,7 @@ export default function MessagePreview({
         onClick={onToggle}
         className={cn(
           "relative",
-          "h-[75px]",
+          "h-18.75",
           "w-full",
           "shrink-0",
           "border-b-2",
@@ -392,7 +393,7 @@ export default function MessagePreview({
             "text-right",
             "text-[18px]",
             "font-bold",
-            "leading-[27px]",
+            "leading-6.75",
             "text-[#434343]",
           )}
         >

@@ -126,12 +126,12 @@ function handleSubmit(
           "rounded-[28px] border-0",
           "bg-white p-0",
           "shadow-[0_24px_90px_rgba(0,0,0,0.2)]",
-          "sm:max-w-[470px]",
+          "sm:max-w-117.5",
         )}
       >
         <DialogHeader
           className={cn(
-            "relative flex h-[88px]",
+            "relative flex h-22",
             "items-center justify-center",
             "border-b border-[#eeeeee]",
             "px-8 text-center",

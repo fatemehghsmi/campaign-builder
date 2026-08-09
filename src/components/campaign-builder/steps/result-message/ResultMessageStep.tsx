@@ -261,7 +261,7 @@ export default function ResultMessageStep() {
         onSubmit={handleSubmit(handleValidSubmit)}
         noValidate
         className={cn(
-          "relative min-h-[1460px] w-full bg-white",
+          "relative min-h-365 w-full bg-white",
         )}
       >
         <input
@@ -272,8 +272,8 @@ export default function ResultMessageStep() {
           className="hidden"
         />
 
-        <main className="w-full px-6 pb-10 pt-16 lg:px-[100px]">
-          <div className="mx-auto flex w-full max-w-[799px] flex-col gap-8">
+        <main className="w-full px-6 pb-10 pt-16 lg:px-25">
+          <div className="mx-auto flex w-full max-w-199.75 flex-col gap-8">
             <ResultMessageEditor
               control={control}
               errors={errors}

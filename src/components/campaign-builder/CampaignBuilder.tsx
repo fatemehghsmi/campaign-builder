@@ -248,7 +248,7 @@ export default function CampaignBuilder() {
           <section
             dir="rtl"
             className={cn(
-              "min-h-[800px]",
+              "min-h-200",
               "overflow-hidden",
               "rounded-3xl",
               "bg-white shadow-sm",

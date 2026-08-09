@@ -25,7 +25,7 @@ export default function EntryMessageFooter({
         "absolute",
         "inset-x-0",
         "bottom-0",
-        "flex h-[77px]",
+        "flex h-19.25",
         "items-center",
         "justify-between",
         "gap-4",
@@ -38,8 +38,8 @@ export default function EntryMessageFooter({
         variant="ghost"
         onClick={onSaveDraft}
         className={cn(
-          "h-12 w-[165px]",
-          "rounded-[16px]",
+          "h-12 w-41.25",
+          "rounded-2xl",
           "px-4",
           "text-base",
           "font-bold",
@@ -56,7 +56,7 @@ export default function EntryMessageFooter({
       <div
         className={cn(
           "flex h-12",
-          "w-[407px]",
+          "w-101.75",
           "items-center",
           "gap-4",
         )}
@@ -68,7 +68,7 @@ export default function EntryMessageFooter({
           className={cn(
             "h-12",
             "w-[195.5px]",
-            "rounded-[16px]",
+            "rounded-2xl",
             "border-2",
             "border-[#EBEBEB]",
             "bg-white",
@@ -90,7 +90,7 @@ export default function EntryMessageFooter({
           className={cn(
             "h-12",
             "w-[195.5px]",
-            "rounded-[16px]",
+            "rounded-2xl",
             "bg-[#F38353]",
             "text-base",
             "font-bold",

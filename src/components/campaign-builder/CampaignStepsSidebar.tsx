@@ -64,9 +64,9 @@ export default function CampaignStepsSidebar({
     >
       <SidebarContent
         className={cn(
-          "h-[873px] w-[368px]",
+          "h-218.25 w-92",
           "overflow-hidden",
-          "rounded-[24px]",
+          "rounded-3xl",
           "bg-white",
           "px-5 py-1.5",
         )}
@@ -83,8 +83,8 @@ export default function CampaignStepsSidebar({
             <SidebarMenu
               className={cn(
                 "mx-auto h-full",
-                "w-[329px]",
-                "gap-[18px]",
+                "w-82.25",
+                "gap-4.5",
                 "py-4",
               )}
             >
@@ -101,7 +101,7 @@ export default function CampaignStepsSidebar({
                 return (
                   <SidebarMenuItem
                     key={step.id}
-                    className="h-[88px] w-[329px]"
+                    className="h-22 w-82.25"
                   >
                     <SidebarMenuButton
                       type="button"
@@ -120,12 +120,12 @@ export default function CampaignStepsSidebar({
                          * padding: 16px
                          * border-radius: 16px
                          */
-                        "flex h-[88px]",
-                        "min-h-[88px]",
-                        "w-[329px]",
+                        "flex h-22",
+                        "min-h-22",
+                        "w-82.25",
                         "items-center",
                         "gap-4",
-                        "rounded-[16px]",
+                        "rounded-2xl",
                         "border-2",
                         "bg-white p-4",
                         "text-right",
@@ -192,7 +192,7 @@ export default function CampaignStepsSidebar({
                             "text-right",
                             "text-sm",
                             "font-medium",
-                            "leading-[21px]",
+                            "leading-5.25",
                             "text-[#848382]",
                           )}
                         >
@@ -224,7 +224,7 @@ export default function CampaignStepsSidebar({
                       >
                         {isCompleted && (
                           <Check
-                            className="size-[14px]"
+                            className="size-3.5"
                             strokeWidth={3}
                           />
                         )}
