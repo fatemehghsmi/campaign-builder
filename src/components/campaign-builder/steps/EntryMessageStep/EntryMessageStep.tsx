@@ -178,20 +178,23 @@ export default function EntryMessageStep() {
     dispatch(previousStep());
   }
 
-  function insertTokenIntoMessage(token: string) {
-    const currentMessage = getValues("message") ?? "";
+function insertTokenIntoMessage(
+  value: string,
+  start: number,
+  end: number,
+) {
+  const currentMessage =
+    getValues("message") ?? "";
 
-    const needsSpace =
-      currentMessage.length > 0 &&
-      !currentMessage.endsWith(" ") &&
-      !currentMessage.endsWith("\n");
+  const newMessage =
+    currentMessage.slice(0, start) +
+    value +
+    currentMessage.slice(end);
 
-    setValue("message", currentMessage + (needsSpace ? " " : "") + token, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
-  }
+  setValue("message", newMessage, {
+    shouldDirty: true,
+  });
+}
 
   function handleAiRewrite() {
     const currentLink = getValues("linkUrl") || DEFAULT_LINK_URL;

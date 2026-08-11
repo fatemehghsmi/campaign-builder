@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useRef,
+  useState,
+} from "react";
 
 import {
   Controller,
@@ -9,15 +12,24 @@ import {
   type UseFormClearErrors,
 } from "react-hook-form";
 
-import { Check, ChevronDown, Info, Link2, Sparkles } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Info,
+  Link2,
+  Sparkles,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import type { EntryMessageFormValues } from "@/lib/features/campaign-builder/entryMessageSchema";
+import type {
+  EntryMessageFormValues,
+} from "@/lib/features/campaign-builder/entryMessageSchema";
 
 import { cn } from "@/lib/utils";
+
 
 const MAX_MESSAGE_LENGTH = 500;
 
@@ -45,17 +57,17 @@ const variableValues: Record<string, string> = {
   points: "۱۲۰",
 };
 
+
 export interface MessageVariable {
   id: string;
   label: string;
   token: string;
 }
 
+
 interface MessageEditorProps {
   control: Control<EntryMessageFormValues>;
-
   errors: FieldErrors<EntryMessageFormValues>;
-
   clearErrors: UseFormClearErrors<EntryMessageFormValues>;
 
   isEnabled: boolean;
@@ -63,23 +75,27 @@ interface MessageEditorProps {
 
   variables: readonly MessageVariable[];
 
-  onInsertToken: (value: string) => void;
+  onInsertToken: (
+    value: string,
+    start: number,
+    end: number,
+  ) => void;
 
   onOpenLinkDialog: () => void;
-
   onAiRewrite: () => void;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                   Toggle                                   */
-/* -------------------------------------------------------------------------- */
 
 interface MessageToggleProps {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
 }
 
-function MessageToggle({ checked, onCheckedChange }: MessageToggleProps) {
+
+function MessageToggle({
+  checked,
+  onCheckedChange,
+}: MessageToggleProps) {
   return (
     <button
       id="entry-message-enabled"
@@ -88,44 +104,29 @@ function MessageToggle({ checked, onCheckedChange }: MessageToggleProps) {
       dir="ltr"
       aria-checked={checked}
       aria-label="فعال یا غیرفعال کردن ارسال پیام"
-      onClick={() => {
-        onCheckedChange(!checked);
-      }}
+      onClick={() =>
+        onCheckedChange(!checked)
+      }
       className={cn(
-        "relative inline-flex",
-        "h-6 w-10.5",
-        "shrink-0 items-center",
-        "rounded-lg",
-        "border-0 p-1",
-        "outline-none",
-        "transition-colors duration-200",
-
-        checked ? "bg-[#F38353]" : "bg-[#EBEBEB]",
-
-        "focus-visible:ring-2",
-        "focus-visible:ring-[#F38353]/20",
-        "focus-visible:ring-offset-2",
+        "relative inline-flex h-6 w-10.5 shrink-0 items-center rounded-lg p-1 outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2",
+        checked
+          ? "bg-primary"
+          : "bg-border",
       )}
     >
       <span
         aria-hidden="true"
         className={cn(
-          "absolute left-1 top-1",
-          "size-4",
-          "rounded-sm",
-          "bg-white",
-          "transition-transform duration-200",
-
-          checked ? "translate-x-4.5" : "translate-x-0",
+          "absolute left-1 top-1 size-4 rounded-sm bg-surface transition-transform duration-200",
+          checked
+            ? "translate-x-4.5"
+            : "translate-x-0",
         )}
       />
     </button>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                   Tooltip                                  */
-/* -------------------------------------------------------------------------- */
 
 function MessageInfoTooltip() {
   return (
@@ -133,72 +134,30 @@ function MessageInfoTooltip() {
       <button
         type="button"
         aria-label="راهنمای ارسال پیام"
-        className={cn(
-          "flex size-4.5",
-          "items-center justify-center",
-          "rounded-full outline-none",
-
-          "focus-visible:ring-2",
-          "focus-visible:ring-[#F38353]/20",
-        )}
+        className="flex size-4.5 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
       >
         <Info
           aria-hidden="true"
           strokeWidth={1.8}
-          className="size-4.5 text-[#F38353]"
+          className="size-4.5 text-primary"
         />
       </button>
 
       <div
         role="tooltip"
-        className={cn(
-          "pointer-events-none",
-          "invisible absolute",
-          "-left-3 top-7.5",
-          "z-110",
-          "flex h-21.75 w-45.75",
-          "translate-y-1",
-          "items-center",
-          "rounded-2xl",
-          "border border-[#EBEBEB]",
-          "bg-white",
-          "px-4 py-3",
-          "text-right",
-          "text-sm font-medium",
-          "leading-5.25",
-          "text-[#434343]",
-          "opacity-0",
-          "shadow-[0_8px_24px_rgba(0,0,0,0.06)]",
-          "transition-all duration-150",
-
-          "group-hover:visible",
-          "group-hover:translate-y-0",
-          "group-hover:opacity-100",
-
-          "group-focus-within:visible",
-          "group-focus-within:translate-y-0",
-          "group-focus-within:opacity-100",
-        )}
+        className="pointer-events-none invisible absolute -left-3 top-7.5 z-110 flex h-21.75 w-45.75 translate-y-1 items-center rounded-2xl border border-border bg-surface px-4 py-3 text-right text-sm font-medium leading-5.25 text-text opacity-0 shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
       >
         <span
           aria-hidden="true"
-          className={cn(
-            "absolute -top-1.5 left-4",
-            "size-2.75 rotate-45",
-            "border-l border-t",
-            "border-[#EBEBEB]",
-            "bg-white",
-          )}
+          className="absolute -top-1.5 left-4 size-2.75 rotate-45 border-l border-t border-border bg-surface"
         />
+
         در صورت غیرفعال کردن ارسال پیام، پیام شما برای مخاطب ارسال نمی‌شود.
       </div>
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                         Full-width sender dropdown                         */
-/* -------------------------------------------------------------------------- */
 
 interface SenderLineDropdownProps {
   value: string;
@@ -207,23 +166,33 @@ interface SenderLineDropdownProps {
   onChange: (value: string) => void;
 }
 
+
 function SenderLineDropdown({
   value,
   disabled,
   hasError,
   onChange,
 }: SenderLineDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] =
+    useState(false);
 
-  const selectedLine = senderLines.find((line) => line.id === value);
+  const selectedLine =
+    senderLines.find(
+      (line) => line.id === value,
+    );
 
   return (
     <div
       className="relative w-full"
       onBlur={(event) => {
-        const nextTarget = event.relatedTarget as Node | null;
+        const nextTarget =
+          event.relatedTarget as Node | null;
 
-        if (!event.currentTarget.contains(nextTarget)) {
+        if (
+          !event.currentTarget.contains(
+            nextTarget,
+          )
+        ) {
           setIsOpen(false);
         }
       }}
@@ -236,50 +205,40 @@ function SenderLineDropdown({
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-invalid={hasError}
-        onClick={() => {
-          setIsOpen((current) => !current);
-        }}
+        onClick={() =>
+          setIsOpen(
+            (current) => !current,
+          )
+        }
         className={cn(
-          "grid h-14 w-full",
-          "grid-cols-[22px_1fr]",
-          "items-center gap-2",
-          "rounded-2xl",
-          "border-2",
-          "bg-white px-4",
-          "text-base font-medium",
-          "leading-6",
-          "shadow-none",
-          "outline-none",
-          "transition-colors",
+          "grid h-14 w-full grid-cols-[22px_1fr] items-center gap-2 rounded-2xl border-2 bg-surface px-4 text-base font-medium leading-6 shadow-none outline-none transition-colors focus-visible:border-primary focus-visible:ring-0 disabled:cursor-not-allowed disabled:bg-background disabled:opacity-60",
+          {
+            "border-danger":
+              hasError,
 
-          hasError ? "border-[#FF383C]" : "border-[#EBEBEB]",
+            "border-primary":
+              isOpen && !hasError,
 
-          isOpen && !hasError && "border-[#F38353]",
-
-          "focus-visible:border-[#F38353]",
-          "focus-visible:ring-0",
-
-          "disabled:cursor-not-allowed",
-          "disabled:bg-[#F7F7F7]",
-          "disabled:opacity-60",
+            "border-border":
+              !isOpen && !hasError,
+          },
         )}
       >
         <ChevronDown
           aria-hidden="true"
           className={cn(
-            "size-5.5",
-            "text-[#848382]",
-            "transition-transform",
-
-            isOpen && "rotate-180",
+            "size-5.5 text-text-muted transition-transform",
+            isOpen &&
+              "rotate-180",
           )}
         />
 
         <span
           dir="ltr"
-          className={cn("block w-full", "text-right", "text-[#848382]")}
+          className="block w-full text-right text-text-muted"
         >
-          {selectedLine?.label ?? "خط ارسال را انتخاب کنید"}
+          {selectedLine?.label ??
+            "خط ارسال را انتخاب کنید"}
         </span>
       </button>
 
@@ -288,78 +247,62 @@ function SenderLineDropdown({
           role="listbox"
           dir="rtl"
           aria-label="خط ارسال‌کننده پیامک"
-          className={cn(
-            "absolute inset-x-0",
-            "top-[calc(100%+1px)]",
-            "z-100",
-            "w-full",
-            "overflow-hidden",
-            "rounded-2xl",
-            "border-2",
-            "border-[#EBEBEB]",
-            "bg-white",
-            "p-0",
-            "shadow-[0_12px_32px_rgba(0,0,0,0.08)]",
-          )}
+          className="absolute inset-x-0 top-[calc(100%+1px)] z-100 w-full overflow-hidden rounded-2xl border-2 border-border bg-surface shadow-[0_12px_32px_rgba(0,0,0,0.08)]"
         >
-          {senderLines.map((line, index) => {
-            const isSelected = value === line.id;
+          {senderLines.map(
+            (line, index) => {
+              const isSelected =
+                value === line.id;
 
-            return (
-              <button
-                key={line.id}
-                type="button"
-                role="option"
-                dir="ltr"
-                aria-selected={isSelected}
-                onClick={() => {
-                  onChange(line.id);
-                  setIsOpen(false);
-                }}
-                className={cn(
-                  "grid h-12",
-                  "w-full max-w-none",
-                  "grid-cols-[22px_1fr]",
-                  "items-center gap-2",
-                  "px-4",
-                  "text-base font-medium",
-                  "outline-none",
-                  "transition-colors",
-
-                  isSelected
-                    ? ["bg-[#FFF4EF]", "text-[#F38353]"]
-                    : ["bg-white", "text-[#434343]"],
-
-                  "hover:bg-[#FFF4EF]",
-                  "hover:text-[#F38353]",
-
-                  "focus:bg-[#FFF4EF]",
-                  "focus:text-[#F38353]",
-
-                  index < senderLines.length - 1 && "border-b border-[#F3F3F3]",
-                )}
-              >
-                <span className="flex size-5.5 items-center justify-center">
-                  {isSelected && (
-                    <Check aria-hidden="true" className="size-4.5" />
+              return (
+                <button
+                  key={line.id}
+                  type="button"
+                  role="option"
+                  dir="ltr"
+                  aria-selected={
+                    isSelected
+                  }
+                  onClick={() => {
+                    onChange(line.id);
+                    setIsOpen(false);
+                  }}
+                  className={cn(
+                    "grid h-12 w-full grid-cols-[22px_1fr] items-center gap-2 px-4 text-base font-medium outline-none transition-colors hover:bg-primary-soft hover:text-primary focus:bg-primary-soft focus:text-primary",
+                    isSelected
+                      ? "bg-primary-soft text-primary"
+                      : "bg-surface text-text",
+                    index <
+                      senderLines.length -
+                        1 &&
+                      "border-b border-border",
                   )}
-                </span>
+                >
+                  <span className="flex size-5.5 items-center justify-center">
+                    {isSelected && (
+                      <Check
+                        aria-hidden="true"
+                        className="size-4.5"
+                      />
+                    )}
+                  </span>
 
-                <span dir="ltr" className="block w-full text-right">
-                  {line.label}
-                </span>
-              </button>
-            );
-          })}
+                  <span
+                    dir="ltr"
+                    className="block w-full text-right"
+                  >
+                    {line.label}
+                  </span>
+                </button>
+              );
+            },
+          )}
         </div>
       )}
     </div>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                               Main component                               */
-/* -------------------------------------------------------------------------- */
 
 export default function MessageEditor({
   control,
@@ -372,46 +315,66 @@ export default function MessageEditor({
   onOpenLinkDialog,
   onAiRewrite,
 }: MessageEditorProps) {
-  function handleInsertVariable(variable: MessageVariable) {
-    const actualValue = variableValues[variable.id] ?? variable.token;
+  const textareaRef =
+    useRef<HTMLTextAreaElement | null>(
+      null,
+    );
 
-    onInsertToken(actualValue);
+
+ function handleInsertVariable(
+  variable: MessageVariable,
+) {
+  const textarea = textareaRef.current;
+
+  if (!textarea) {
+    return;
   }
+
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+
+  const value =
+    variableValues[variable.id] ??
+    variable.token;
+
+  // The space is part of the inserted value
+  const insertedValue = `${value} `;
+
+  onInsertToken(
+    insertedValue,
+    start,
+    end,
+  );
+
+  const nextPosition =
+    start + insertedValue.length;
+
+  requestAnimationFrame(() => {
+    textarea.focus();
+
+    textarea.setSelectionRange(
+      nextPosition,
+      nextPosition,
+    );
+  });
+}
+
 
   return (
     <section
       dir="rtl"
-      className={cn("flex h-134.25", "w-full flex-col", "gap-4")}
+      className="flex h-134.25 w-full flex-col gap-4"
     >
-      {/* Title and toggle */}
-      <div
-        className={cn(
-          "flex h-7 w-full",
-          "items-center",
-          "justify-between gap-4",
-        )}
-      >
-        <h2
-          className={cn(
-            "m-0 text-right",
-            "text-[18px] font-bold",
-            "leading-6.75",
-            "text-[#434343]",
-          )}
-        >
+      {/* Title */}
+      <div className="flex h-7 w-full items-center justify-between gap-4">
+        <h2 className="m-0 text-right text-lg font-bold leading-6.75 text-text">
           ویرایش پیام
         </h2>
 
         <div className="flex h-7 items-center justify-end gap-2">
           <Label
             htmlFor="entry-message-enabled"
-            className={cn(
-              "whitespace-nowrap",
-              "text-right",
-              "text-base font-medium",
-              "leading-7",
-              "text-[#434343]",
-            )}
+            className="whitespace-nowrap text-right text-base font-medium leading-7 text-text"
           >
             ارسال پیام
           </Label>
@@ -423,12 +386,21 @@ export default function MessageEditor({
             name="isEnabled"
             render={({ field }) => (
               <MessageToggle
-                checked={Boolean(field.value)}
-                onCheckedChange={(checked) => {
-                  field.onChange(checked);
+                checked={Boolean(
+                  field.value,
+                )}
+                onCheckedChange={(
+                  checked,
+                ) => {
+                  field.onChange(
+                    checked,
+                  );
 
                   if (!checked) {
-                    clearErrors(["senderLineId", "message"]);
+                    clearErrors([
+                      "senderLineId",
+                      "message",
+                    ]);
                   }
                 }}
               />
@@ -437,37 +409,34 @@ export default function MessageEditor({
         </div>
       </div>
 
+
       {/* Channel */}
-      <div className={cn("flex h-8 w-full", "items-center justify-start")}>
+      <div className="flex h-8 w-full items-center justify-start">
         <div className="flex items-center justify-start gap-2 text-right">
-          <span
-            className={cn("text-base font-bold", "leading-6", "text-[#848382]")}
-          >
+          <span className="text-base font-bold leading-6 text-text-muted">
             کانال ارسال:
           </span>
 
-          <span
-            className={cn("text-base font-bold", "leading-6", "text-[#434343]")}
-          >
+          <span className="text-base font-bold leading-6 text-text">
             پیامک
           </span>
         </div>
       </div>
 
-      {/* Sender number */}
-      <div className={cn("flex h-22", "w-full flex-col", "items-end gap-1")}>
+
+      {/* Sender */}
+      <div className="flex h-22 w-full flex-col items-end gap-1">
         <Label
           htmlFor="sender-line"
-          className={cn(
-            "block h-7 w-full",
-            "text-right",
-            "text-base font-medium",
-            "leading-7",
-            "text-[#434343]",
-          )}
+          className="block h-7 w-full text-right text-base font-medium leading-7 text-text"
         >
           خط ارسال‌کننده پیامک
-          {isEnabled && <span className="mr-1 text-[#FF383C]">*</span>}
+
+          {isEnabled && (
+            <span className="mr-1 text-danger">
+              *
+            </span>
+          )}
         </Label>
 
         <Controller
@@ -477,103 +446,94 @@ export default function MessageEditor({
             <SenderLineDropdown
               value={field.value}
               disabled={!isEnabled}
-              hasError={Boolean(errors.senderLineId)}
-              onChange={field.onChange}
+              hasError={
+                !!errors.senderLineId
+              }
+              onChange={
+                field.onChange
+              }
             />
           )}
         />
 
         {errors.senderLineId && (
-          <p role="alert" className="w-full text-right text-sm text-[#FF383C]">
-            {errors.senderLineId.message}
+          <p
+            role="alert"
+            className="w-full text-right text-sm text-danger"
+          >
+            {
+              errors.senderLineId
+                .message
+            }
           </p>
         )}
       </div>
 
-      {/* AI button */}
-      <div dir="ltr" className="flex h-10 w-full items-center justify-start">
+
+      {/* AI */}
+      <div
+        dir="ltr"
+        className="flex h-10 w-full items-center justify-start"
+      >
         <Button
           type="button"
           disabled={!isEnabled}
           onClick={onAiRewrite}
-          className={cn(
-            "h-10 w-39.5",
-            "rounded-2xl",
-            "border-0 px-4",
-            "bg-[linear-gradient(90deg,#F0682D_0%,#F8BE3F_100%)]",
-            "text-base font-bold",
-            "leading-6 text-white",
-            "shadow-[inset_-1.5px_-1.5px_1.5px_#ED591A]",
-
-            "hover:opacity-90",
-            "disabled:opacity-40",
-          )}
+          className="h-10 w-39.5 rounded-2xl border-0 bg-[linear-gradient(90deg,#F0682D_0%,#F8BE3F_100%)] px-4 text-base font-bold leading-6 text-white shadow-[inset_-1.5px_-1.5px_1.5px_#ED591A] hover:opacity-90 disabled:opacity-40"
         >
           AI بازنویسی با
           <Sparkles className="size-5.5" />
         </Button>
       </div>
 
-      {/* Variables */}
-      <div
-        className={cn(
-          "flex h-7.25",
-          "w-full items-start",
-          "justify-start gap-2",
-        )}
-      >
-        {variables.map((variable) => (
-          <Button
-            key={variable.id}
-            type="button"
-            variant="outline"
-            disabled={!isEnabled}
-            onClick={() => {
-              handleInsertVariable(variable);
-            }}
-            className={cn(
-              "h-7.25",
-              "rounded-lg",
-              "border border-[#F38353]",
-              "bg-white px-3 py-1",
-              "text-sm font-medium",
-              "leading-5.25",
-              "text-[#F38353]",
-              "shadow-none",
 
-              "hover:bg-[#FFF4EF]",
-              "hover:text-[#F38353]",
-              "disabled:opacity-40",
-            )}
-          >
-            {variable.label}
-          </Button>
-        ))}
+      {/* Variables */}
+      <div className="flex h-7.25 w-full items-start justify-start gap-2">
+        {variables.map(
+          (variable) => (
+            <Button
+              key={variable.id}
+              type="button"
+              variant="outline"
+              disabled={
+                !isEnabled
+              }
+
+              // Important:
+              // keep textarea focused
+              onMouseDown={(
+                event,
+              ) => {
+                event.preventDefault();
+              }}
+
+              onClick={() =>
+                handleInsertVariable(
+                  variable,
+                )
+              }
+              className="h-7.25 rounded-lg border border-primary bg-surface px-3 py-1 text-sm font-medium leading-5.25 text-primary shadow-none hover:bg-primary-soft hover:text-primary disabled:opacity-40"
+            >
+              {variable.label}
+            </Button>
+          ),
+        )}
 
         <Button
           type="button"
           variant="outline"
           disabled={!isEnabled}
-          onClick={onOpenLinkDialog}
-          className={cn(
-            "h-7.25",
-            "rounded-lg",
-            "border border-[#F38353]",
-            "bg-white px-3 py-1",
-            "text-sm font-medium",
-            "leading-5.25",
-            "text-[#F38353]",
-            "shadow-none",
-
-            "hover:bg-[#FFF4EF]",
-            "hover:text-[#F38353]",
-            "disabled:opacity-40",
-          )}
+          onClick={
+            onOpenLinkDialog
+          }
+          className="h-7.25 rounded-lg border border-primary bg-surface px-3 py-1 text-sm font-medium leading-5.25 text-primary shadow-none hover:bg-primary-soft hover:text-primary disabled:opacity-40"
         >
           لینک
+
           <Link2 className="size-4.5" />
         </Button>
       </div>
+
 
       {/* Textarea */}
       <div className="relative h-60 w-full">
@@ -582,62 +542,53 @@ export default function MessageEditor({
           name="message"
           render={({ field }) => (
             <Textarea
-              ref={field.ref}
+              ref={(element) => {
+                textareaRef.current =
+                  element;
+
+                field.ref(element);
+              }}
               name={field.name}
-              value={field.value ?? ""}
-              onBlur={field.onBlur}
-              onChange={field.onChange}
-              disabled={!isEnabled}
-              aria-invalid={Boolean(errors.message)}
+              value={
+                field.value ?? ""
+              }
+              onBlur={
+                field.onBlur
+              }
+              onChange={
+                field.onChange
+              }
+              disabled={
+                !isEnabled
+              }
+              aria-invalid={
+                !!errors.message
+              }
               placeholder="متن پیام را بنویسید"
-              maxLength={MAX_MESSAGE_LENGTH}
               className={cn(
-                "h-60",
-                "min-h-60",
-                "w-full resize-none",
-                "rounded-2xl",
-                "border-2 bg-white",
-                "px-6 pb-12 pt-4",
-                "text-right",
-                "text-base font-medium",
-                "leading-7",
-                "text-[#434343]",
-                "shadow-none",
-
-                errors.message ? "border-[#FF383C]" : "border-[#EBEBEB]",
-
-                "focus-visible:border-[#F38353]",
-                "focus-visible:ring-0",
-                "focus-visible:ring-offset-0",
-
-                "disabled:bg-[#F7F7F7]",
+                "h-60 min-h-60 w-full resize-none rounded-2xl border-2 bg-surface px-6 pb-12 pt-4 text-right text-base font-medium leading-7 text-text shadow-none focus-visible:border-primary focus-visible:ring-0 focus-visible:ring-offset-0 disabled:bg-background",
+                errors.message
+                  ? "border-danger"
+                  : "border-border",
               )}
             />
           )}
         />
 
-        <span
-          className={cn(
-            "pointer-events-none",
-            "absolute bottom-4 left-6",
-            "text-xs font-medium",
-            "leading-4.5",
-            "text-[#B4B4B4]",
-          )}
-        >
-          {message.length}/{MAX_MESSAGE_LENGTH}
+        <span className="pointer-events-none absolute bottom-4 left-6 text-xs font-medium leading-4.5 text-text-disabled">
+          {message.length}/
+          {MAX_MESSAGE_LENGTH}
         </span>
 
         {errors.message && (
           <p
             role="alert"
-            className={cn(
-              "absolute -bottom-6 right-0",
-              "text-right text-sm",
-              "text-[#FF383C]",
-            )}
+            className="absolute -bottom-6 right-0 text-right text-sm text-danger"
           >
-            {errors.message.message}
+            {
+              errors.message
+                .message
+            }
           </p>
         )}
       </div>

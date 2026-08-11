@@ -171,24 +171,24 @@ export default function ResultMessageStep() {
   }
 
 
-  function insertTextIntoMessage(
+function insertTextIntoMessage(
   value: string,
   start: number,
   end: number,
 ) {
-  const currentMessage =
+  const message =
     getValues("message") ?? "";
 
-  const newMessage =
-    currentMessage.slice(0, start) +
-    value +
-    currentMessage.slice(end);
-
-  setValue("message", newMessage, {
-    shouldDirty: true,
-  });
+  setValue(
+    "message",
+    message.slice(0, start) +
+      value +
+      message.slice(end),
+    {
+      shouldDirty: true,
+    },
+  );
 }
-
 
   function handleAiRewrite() {
     const currentLink =

@@ -8,13 +8,22 @@ import {
   type UseFormClearErrors,
 } from "react-hook-form";
 
-import { ImagePlus, Info, Link2, Pencil, Sparkles, Trash2 } from "lucide-react";
+import {
+  ImagePlus,
+  Info,
+  Link2,
+  Pencil,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import type { ResultMessageFormValues } from "@/lib/features/campaign-builder/resultMessageSchema";
+import type {
+  ResultMessageFormValues,
+} from "@/lib/features/campaign-builder/resultMessageSchema";
 
 import { cn } from "@/lib/utils";
 
@@ -36,7 +45,11 @@ interface ResultMessageEditorProps {
   imageError: string;
   variables: readonly ResultMessageVariable[];
 
-  onInsertValue: (value: string, start: number, end: number) => void;
+  onInsertValue: (
+    value: string,
+    start: number,
+    end: number,
+  ) => void;
 
   onOpenLinkDialog: () => void;
   onAiRewrite: () => void;
@@ -49,7 +62,10 @@ interface MessageToggleProps {
   onCheckedChange: (checked: boolean) => void;
 }
 
-function MessageToggle({ checked, onCheckedChange }: MessageToggleProps) {
+function MessageToggle({
+  checked,
+  onCheckedChange,
+}: MessageToggleProps) {
   return (
     <button
       id="result-message-enabled"
@@ -98,6 +114,7 @@ function MessageInfoTooltip() {
           aria-hidden="true"
           className="absolute -top-1.5 left-4 size-2.75 rotate-45 border-l border-t border-border bg-surface"
         />
+
         در صورت غیرفعال کردن ارسال پیام، پیام برای مخاطب ارسال نمی‌شود.
       </div>
     </div>
@@ -119,45 +136,42 @@ export default function ResultMessageEditor({
   onImageButtonClick,
   onDeleteImage,
 }: ResultMessageEditorProps) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  const selectionRef = useRef({
-    start: message.length,
-    end: message.length,
-  });
-  function saveSelection(textarea: HTMLTextAreaElement) {
-    selectionRef.current = {
-      start: textarea.selectionStart,
-      end: textarea.selectionEnd,
-    };
-  }
+  const textareaRef =
+    useRef<HTMLTextAreaElement | null>(null);
 
   function handleInsertValue(value: string) {
-    const { start, end } = selectionRef.current;
+    const textarea = textareaRef.current;
 
-    onInsertValue(value, start, end);
+    if (!textarea) return;
 
-    const nextPosition = start + value.length;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
 
-    selectionRef.current = {
-      start: nextPosition,
-      end: nextPosition,
-    };
+    const insertedValue = `${value} `;
+
+    onInsertValue(
+      insertedValue,
+      start,
+      end,
+    );
+
+    const nextPosition =
+      start + insertedValue.length;
 
     requestAnimationFrame(() => {
-      const textarea = textareaRef.current;
-
-      if (!textarea) {
-        return;
-      }
-
       textarea.focus();
-      textarea.setSelectionRange(nextPosition, nextPosition);
+      textarea.setSelectionRange(
+        nextPosition,
+        nextPosition,
+      );
     });
   }
 
   return (
-    <section dir="rtl" className="flex w-full flex-col gap-4">
+    <section
+      dir="rtl"
+      className="flex w-full flex-col gap-4"
+    >
       <div className="flex h-7 w-full items-center justify-between gap-4">
         <h2 className="m-0 text-right text-lg font-bold leading-6.75 text-text">
           ویرایش پیام
@@ -183,7 +197,10 @@ export default function ResultMessageEditor({
                   field.onChange(checked);
 
                   if (!checked) {
-                    clearErrors(["message", "imageUrl"]);
+                    clearErrors([
+                      "message",
+                      "imageUrl",
+                    ]);
                   }
                 }}
               />
@@ -207,10 +224,14 @@ export default function ResultMessageEditor({
       <div
         className={cn(
           "flex min-h-52.5 w-full flex-row-reverse items-center gap-6 rounded-2xl border-2 border-dashed border-border p-4",
-          !isEnabled && "bg-background opacity-60",
+          !isEnabled &&
+            "bg-background opacity-60",
         )}
       >
-        <div dir="ltr" className="flex flex-1 items-center justify-start gap-3">
+        <div
+          dir="ltr"
+          className="flex flex-1 items-center justify-start gap-3"
+        >
           {imageUrl && (
             <Button
               type="button"
@@ -256,17 +277,24 @@ export default function ResultMessageEditor({
             <span className="flex flex-col items-center gap-3 text-text-subtle">
               <ImagePlus className="size-9" />
 
-              <span className="text-xs">افزودن تصویر</span>
+              <span className="text-xs">
+                افزودن تصویر
+              </span>
             </span>
           )}
         </button>
       </div>
 
       {imageError && (
-        <p className="text-right text-sm text-danger">{imageError}</p>
+        <p className="text-right text-sm text-danger">
+          {imageError}
+        </p>
       )}
 
-      <div dir="ltr" className="flex h-10 w-full items-center justify-start">
+      <div
+        dir="ltr"
+        className="flex h-10 w-full items-center justify-start"
+      >
         <Button
           type="button"
           disabled={!isEnabled}
@@ -288,7 +316,11 @@ export default function ResultMessageEditor({
             onMouseDown={(event) => {
               event.preventDefault();
             }}
-            onClick={() => handleInsertValue(variable.value)}
+            onClick={() =>
+              handleInsertValue(
+                variable.value,
+              )
+            }
             className="h-7.25 rounded-lg border border-primary bg-surface px-3 py-1 text-sm font-medium leading-5.25 text-primary shadow-none hover:bg-primary-soft hover:text-primary disabled:opacity-40"
           >
             {variable.label}
@@ -314,41 +346,33 @@ export default function ResultMessageEditor({
           render={({ field }) => (
             <Textarea
               ref={(element) => {
-                textareaRef.current = element;
+                textareaRef.current =
+                  element;
+
                 field.ref(element);
               }}
               name={field.name}
               value={field.value ?? ""}
-              onBlur={(event) => {
-                saveSelection(event.currentTarget);
-                field.onBlur();
-              }}
-              onChange={(event) => {
-                field.onChange(event.target.value);
-                saveSelection(event.currentTarget);
-              }}
-              onClick={(event) => {
-                saveSelection(event.currentTarget);
-              }}
-              onKeyUp={(event) => {
-                saveSelection(event.currentTarget);
-              }}
-              onSelect={(event) => {
-                saveSelection(event.currentTarget);
-              }}
+              onBlur={field.onBlur}
+              onChange={field.onChange}
               disabled={!isEnabled}
-              aria-invalid={!!errors.message}
+              aria-invalid={
+                !!errors.message
+              }
               placeholder="متن پیام را بنویسید"
               className={cn(
                 "h-60 min-h-60 w-full resize-none rounded-2xl border-2 bg-surface px-6 pb-12 pt-4 text-right text-base font-medium leading-7 text-text shadow-none focus-visible:border-primary focus-visible:ring-0 focus-visible:ring-offset-0 disabled:bg-background",
-                errors.message ? "border-danger" : "border-border",
+                errors.message
+                  ? "border-danger"
+                  : "border-border",
               )}
             />
           )}
         />
 
         <span className="pointer-events-none absolute bottom-4 left-6 text-xs font-medium leading-4.5 text-text-disabled">
-          {message.length}/{MAX_MESSAGE_LENGTH}
+          {message.length}/
+          {MAX_MESSAGE_LENGTH}
         </span>
 
         {errors.message && (
