@@ -1,24 +1,26 @@
 "use client";
 
 import {
-  useMemo,
   useRef,
   useState,
   type ChangeEvent,
 } from "react";
+
 import {
   useForm,
   useWatch,
-  type SubmitHandler,
 } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import AddLinkDialog, {
   type AddedLink,
 } from "../../AddLinkDialog";
+
 import ResultMessageEditor, {
   type ResultMessageVariable,
 } from "./ResultMessageEditor";
+
 import ResultMessageFooter from "./ResultMessageFooter";
 import ResultMessagePreview from "./ResultMessagePreview";
 
@@ -28,15 +30,17 @@ import {
   resultMessageSaved,
   selectResultMessage,
 } from "@/lib/features/campaign-builder/campaignBuilderSlice";
+
 import {
   resultMessageSchema,
   type ResultMessageFormValues,
 } from "@/lib/features/campaign-builder/resultMessageSchema";
+
 import {
   useAppDispatch,
   useAppSelector,
 } from "@/lib/hooks";
-import { cn } from "@/lib/utils";
+
 
 const DEFAULT_LINK = "https://www.atrmajlesi.ir";
 
@@ -58,6 +62,7 @@ const messageVariables: readonly ResultMessageVariable[] = [
   { id: "points", label: "امتیاز", value: exampleCustomer.points },
 ];
 
+
 function createDefaultMessage(linkUrl: string): string {
   return `سلام ${exampleCustomer.firstName} ${exampleCustomer.lastName} عزیز
 ورود شما را به باشگاه مشتریان ${exampleCustomer.clubName} تبریک می‌گوییم.
@@ -68,16 +73,19 @@ ${linkUrl}
 لغو 11`;
 }
 
+
 export default function ResultMessageStep() {
   const dispatch = useAppDispatch();
   const savedResultMessage = useAppSelector(selectResultMessage);
+
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(true);
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [imageError, setImageError] = useState("");
 
-  const initialLinkUrl = savedResultMessage.linkUrl || DEFAULT_LINK;
+  const initialLinkUrl =
+    savedResultMessage.linkUrl || DEFAULT_LINK;
 
   const {
     control,
@@ -88,102 +96,150 @@ export default function ResultMessageStep() {
     formState: { errors },
   } = useForm<ResultMessageFormValues>({
     resolver: zodResolver(resultMessageSchema),
-    mode: "onBlur",
+    mode: "onSubmit",
+
     defaultValues: {
       isEnabled: savedResultMessage.isEnabled ?? true,
       channel: "bale",
       imageUrl: savedResultMessage.imageUrl ?? "",
+
       message:
         savedResultMessage.message?.trim() ||
         createDefaultMessage(initialLinkUrl),
+
       linkUrl: initialLinkUrl,
+
       uniqueLinkPerCustomer:
         savedResultMessage.uniqueLinkPerCustomer ?? false,
     },
   });
 
   const isEnabled =
-    useWatch({ control, name: "isEnabled" }) ?? false;
+    useWatch({
+      control,
+      name: "isEnabled",
+    }) ?? false;
+
   const message =
-    useWatch({ control, name: "message" }) ?? "";
+    useWatch({
+      control,
+      name: "message",
+    }) ?? "";
+
   const imageUrl =
-    useWatch({ control, name: "imageUrl" }) ?? "";
+    useWatch({
+      control,
+      name: "imageUrl",
+    }) ?? "";
+
   const linkUrl =
-    useWatch({ control, name: "linkUrl" }) ?? DEFAULT_LINK;
+    useWatch({
+      control,
+      name: "linkUrl",
+    }) ?? DEFAULT_LINK;
+
   const uniqueLinkPerCustomer =
-    useWatch({ control, name: "uniqueLinkPerCustomer" }) ?? false;
+    useWatch({
+      control,
+      name: "uniqueLinkPerCustomer",
+    }) ?? false;
 
-  const previewMessage = useMemo(
-    () =>
-      message.trim() ||
-      "متن پیام شما در این قسمت نمایش داده می‌شود.",
-    [message],
-  );
+  const previewMessage =
+    message.trim() ||
+    "متن پیام شما در این قسمت نمایش داده می‌شود.";
 
-  const handleValidSubmit: SubmitHandler<ResultMessageFormValues> = (
-    values,
-  ) => {
+
+  function handleValidSubmit(
+    values: ResultMessageFormValues,
+  ) {
     dispatch(resultMessageSaved(values));
     dispatch(nextStep());
-  };
+  }
+
 
   function handleSaveDraft() {
-    dispatch(resultMessageSaved(getValues()));
+    dispatch(
+      resultMessageSaved(
+        getValues(),
+      ),
+    );
   }
+
 
   function handlePrevious() {
     dispatch(previousStep());
   }
 
-  function insertTextIntoMessage(value: string) {
-    const currentMessage = getValues("message") ?? "";
-    const needsSpace =
-      currentMessage.length > 0 &&
-      !currentMessage.endsWith(" ") &&
-      !currentMessage.endsWith("\n");
+
+  function insertTextIntoMessage(
+  value: string,
+  start: number,
+  end: number,
+) {
+  const currentMessage =
+    getValues("message") ?? "";
+
+  const newMessage =
+    currentMessage.slice(0, start) +
+    value +
+    currentMessage.slice(end);
+
+  setValue("message", newMessage, {
+    shouldDirty: true,
+  });
+}
+
+
+  function handleAiRewrite() {
+    const currentLink =
+      getValues("linkUrl") ||
+      DEFAULT_LINK;
 
     setValue(
       "message",
-      currentMessage + (needsSpace ? " " : "") + value,
+      createDefaultMessage(currentLink),
       {
         shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
       },
     );
   }
 
-  function handleAiRewrite() {
-    const currentLink = getValues("linkUrl") || DEFAULT_LINK;
-
-    setValue("message", createDefaultMessage(currentLink), {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
-  }
 
   function handleImageButtonClick() {
     imageInputRef.current?.click();
   }
 
-  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+
+  function handleImageChange(
+    event: ChangeEvent<HTMLInputElement>,
+  ) {
+    const file =
+      event.target.files?.[0];
 
     if (!file) {
       return;
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
 
     if (!allowedTypes.includes(file.type)) {
-      setImageError("فقط فایل JPG، PNG یا WEBP قابل قبول است");
+      setImageError(
+        "فقط فایل JPG، PNG یا WEBP قابل قبول است",
+      );
+
       event.target.value = "";
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setImageError("حجم تصویر نباید بیشتر از ۵ مگابایت باشد");
+      setImageError(
+        "حجم تصویر نباید بیشتر از ۵ مگابایت باشد",
+      );
+
       event.target.value = "";
       return;
     }
@@ -195,74 +251,114 @@ export default function ResultMessageStep() {
         return;
       }
 
-      setValue("imageUrl", reader.result, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
-      });
+      setValue(
+        "imageUrl",
+        reader.result,
+        {
+          shouldDirty: true,
+        },
+      );
+
       setImageError("");
     };
 
     reader.onerror = () => {
-      setImageError("خواندن تصویر با خطا مواجه شد");
+      setImageError(
+        "خواندن تصویر با خطا مواجه شد",
+      );
     };
 
     reader.readAsDataURL(file);
+
     event.target.value = "";
   }
 
+
   function handleDeleteImage() {
-    setValue("imageUrl", "", {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
+    setValue(
+      "imageUrl",
+      "",
+      {
+        shouldDirty: true,
+      },
+    );
+
     setImageError("");
   }
 
-  function handleAddLink(addedLink: AddedLink) {
-    const newUrl = addedLink.url.trim();
-    const oldUrl = getValues("linkUrl")?.trim() ?? "";
-    let currentMessage = getValues("message") ?? "";
+
+  function handleAddLink(
+    addedLink: AddedLink,
+  ) {
+    const newUrl =
+      addedLink.url.trim();
+
+    const oldUrl =
+      getValues("linkUrl")?.trim() ??
+      "";
+
+    let currentMessage =
+      getValues("message") ?? "";
 
     if (currentMessage.includes("{{link}}")) {
-      currentMessage = currentMessage.replaceAll("{{link}}", newUrl);
-    } else if (oldUrl && currentMessage.includes(oldUrl)) {
-      currentMessage = currentMessage.replaceAll(oldUrl, newUrl);
-    } else if (!currentMessage.includes(newUrl)) {
+      currentMessage =
+        currentMessage.replaceAll(
+          "{{link}}",
+          newUrl,
+        );
+    } else if (
+      oldUrl &&
+      currentMessage.includes(oldUrl)
+    ) {
+      currentMessage =
+        currentMessage.replaceAll(
+          oldUrl,
+          newUrl,
+        );
+    } else if (
+      !currentMessage.includes(newUrl)
+    ) {
       currentMessage +=
-        (currentMessage.length > 0 && !currentMessage.endsWith("\n")
+        (currentMessage.length > 0 &&
+        !currentMessage.endsWith("\n")
           ? "\n"
           : "") + newUrl;
     }
 
-    setValue("linkUrl", newUrl, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
-    setValue("uniqueLinkPerCustomer", addedLink.uniquePerCustomer, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
-    setValue("message", currentMessage, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
+    setValue(
+      "linkUrl",
+      newUrl,
+      {
+        shouldDirty: true,
+      },
+    );
+
+    setValue(
+      "uniqueLinkPerCustomer",
+      addedLink.uniquePerCustomer,
+      {
+        shouldDirty: true,
+      },
+    );
+
+    setValue(
+      "message",
+      currentMessage,
+      {
+        shouldDirty: true,
+      },
+    );
 
     setIsLinkDialogOpen(false);
   }
+
 
   return (
     <>
       <form
         onSubmit={handleSubmit(handleValidSubmit)}
         noValidate
-        className={cn(
-          "relative min-h-365 w-full bg-white",
-        )}
+        className="relative min-h-365 w-full bg-surface"
       >
         <input
           ref={imageInputRef}
@@ -284,7 +380,9 @@ export default function ResultMessageStep() {
               imageError={imageError}
               variables={messageVariables}
               onInsertValue={insertTextIntoMessage}
-              onOpenLinkDialog={() => setIsLinkDialogOpen(true)}
+              onOpenLinkDialog={() =>
+                setIsLinkDialogOpen(true)
+              }
               onAiRewrite={handleAiRewrite}
               onImageButtonClick={handleImageButtonClick}
               onDeleteImage={handleDeleteImage}
@@ -296,7 +394,9 @@ export default function ResultMessageStep() {
               message={previewMessage}
               imageUrl={imageUrl}
               onToggle={() =>
-                setIsPreviewOpen((current) => !current)
+                setIsPreviewOpen(
+                  (current) => !current,
+                )
               }
             />
           </div>
@@ -311,7 +411,9 @@ export default function ResultMessageStep() {
       <AddLinkDialog
         open={isLinkDialogOpen}
         initialUrl={linkUrl || DEFAULT_LINK}
-        initialUniquePerCustomer={uniqueLinkPerCustomer}
+        initialUniquePerCustomer={
+          uniqueLinkPerCustomer
+        }
         onOpenChange={setIsLinkDialogOpen}
         onAddLink={handleAddLink}
       />

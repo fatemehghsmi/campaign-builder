@@ -2,6 +2,31 @@
 
 @theme inline {
   --font-sans: var(--font-yekan);
+
+  --color-primary: #f38353;
+  --color-primary-hover: #ed6f39;
+  --color-primary-soft: #fff4ef;
+
+  --color-text: #434343;
+  --color-text-muted: #848382;
+  --color-text-subtle: #999999;
+  --color-text-disabled: #aaaaaa;
+  --color-text-disabled-strong: #bbbbbb;
+
+  --color-border: #ebebeb;
+  --color-border-strong: #dedede;
+  --color-border-muted: #bdbdbd;
+
+  --color-background: #f7f7f7;
+  --color-surface: #ffffff;
+
+  --color-danger: #ff383c;
+}
+
+@layer base {
+  h3 {
+    @apply m-0;
+  }
 }
 
 html,

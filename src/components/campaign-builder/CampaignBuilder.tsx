@@ -12,7 +12,10 @@ import {
   Users,
 } from "lucide-react";
 
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
 
 import {
   selectCurrentStep,
@@ -20,7 +23,6 @@ import {
 } from "@/lib/features/campaign-builder/campaignBuilderSlice";
 
 import { useAppSelector } from "@/lib/hooks";
-import { cn } from "@/lib/utils";
 
 import CampaignStepsSidebar, {
   type CampaignStepDefinition,
@@ -34,8 +36,9 @@ import JourneySelectionStep from "./steps/JourneySelectionStep";
 import ResultMessageStep from "./steps/result-message/ResultMessageStep";
 import ScheduleStep from "./steps/ScheduleStep";
 
+
 /* -------------------------------------------------------------------------- */
-/*                            Campaign step definitions                       */
+/*                         Campaign step definitions                          */
 /* -------------------------------------------------------------------------- */
 
 const steps = [
@@ -46,8 +49,8 @@ const steps = [
     icon: BadgeCheck,
 
     headerTitle: "اطلاعات کمپین",
-
-    headerDescription: "نام و توضیحات کمپین را وارد کنید",
+    headerDescription:
+      "نام و توضیحات کمپین را وارد کنید",
   },
   {
     id: 2,
@@ -56,18 +59,17 @@ const steps = [
     icon: Route,
 
     headerTitle: "انتخاب سفر مشتری",
-
     headerDescription:
       "از بین سفرهای مشتریان یکی را جهت اجرای کمپین انتخاب کنید",
   },
   {
     id: 3,
     title: "انتخاب سگمنت مشتریان",
-    description: "کمپین برای این مشتریان اجرا می‌شود",
+    description:
+      "کمپین برای این مشتریان اجرا می‌شود",
     icon: Users,
 
     headerTitle: "انتخاب سگمنت مشتریان",
-
     headerDescription:
       "سگمنت مشتریان را انتخاب کنید تا سفر مشتری برای آن‌ها اجرا شود",
   },
@@ -78,8 +80,8 @@ const steps = [
     icon: MessageSquare,
 
     headerTitle: "ویرایش پیام ۱",
-
-    headerDescription: "پیام‌های تعریف‌شده در سفر مشتری را ویرایش کنید",
+    headerDescription:
+      "پیام‌های تعریف‌شده در سفر مشتری را ویرایش کنید",
   },
   {
     id: 5,
@@ -88,39 +90,36 @@ const steps = [
     icon: MessageSquare,
 
     headerTitle: "ویرایش پیام ۲",
-
-    headerDescription: "  پیام های تعریف شده در سفر مشتری را ویرایش کنید ",
+    headerDescription:
+      "پیام‌های تعریف‌شده در سفر مشتری را ویرایش کنید",
   },
   {
     id: 6,
     title: "زمان‌بندی ارسال",
-    description: "شروع و پایان اجرا را مشخص کنید",
+    description:
+      "شروع و پایان اجرا را مشخص کنید",
     icon: Clock3,
 
     headerTitle: "زمان‌بندی ارسال",
-
-    headerDescription: "زمان‌بندی شروع و پایان کمپین را مشخص کنید",
+    headerDescription:
+      "زمان‌بندی شروع و پایان کمپین را مشخص کنید",
   },
   {
     id: 7,
     title: "جزئیات و صورت‌حساب",
-    description: "پرداخت صورت‌حساب و شروع کمپین",
+    description:
+      "پرداخت صورت‌حساب و شروع کمپین",
     icon: ReceiptText,
 
     headerTitle: "جزئیات و صورت‌حساب",
-
     headerDescription:
       "خلاصه‌ای از جزئیات کمپینی که ساخته‌اید را قبل از اجرا ببینید",
   },
 ] as const satisfies readonly CampaignStepDefinition[];
 
-/* -------------------------------------------------------------------------- */
-/*                            Step validation helper                          */
-/* -------------------------------------------------------------------------- */
 
-function isCampaignStep(value: number): value is CampaignStep {
-  return Number.isInteger(value) && value >= 1 && value <= 7;
-}
+
+
 
 /* -------------------------------------------------------------------------- */
 /*                           Current step content                             */
@@ -130,7 +129,9 @@ interface CurrentStepContentProps {
   currentStep: CampaignStep;
 }
 
-function CurrentStepContent({ currentStep }: CurrentStepContentProps) {
+function CurrentStepContent({
+  currentStep,
+}: CurrentStepContentProps) {
   switch (currentStep) {
     case 1:
       return <CampaignInformationStep />;
@@ -158,62 +159,45 @@ function CurrentStepContent({ currentStep }: CurrentStepContentProps) {
   }
 }
 
+
 /* -------------------------------------------------------------------------- */
 /*                              Main component                                */
 /* -------------------------------------------------------------------------- */
 
 export default function CampaignBuilder() {
-  /*
-   * The selector may be typed as number.
-   */
-  const rawCurrentStep = useAppSelector(selectCurrentStep);
+ 
 
-  /*
-   * Convert it safely to CampaignStep.
-   * Invalid values fall back to Step 1.
-   */
-  const currentStep: CampaignStep = isCampaignStep(rawCurrentStep)
-    ? rawCurrentStep
-    : 1;
+  const currentStep =
+  useAppSelector(selectCurrentStep);
 
   const currentStepDefinition =
-    steps.find((step) => step.id === currentStep) ?? steps[0];
+    steps.find(
+      (step) => step.id === currentStep,
+    ) ?? steps[0];
 
-  const CurrentStepIcon = currentStepDefinition.icon;
-
-  const currentStepTitle = currentStepDefinition.headerTitle;
-
-  const currentStepDescription = currentStepDefinition.headerDescription;
+  const {
+    icon: CurrentStepIcon,
+    headerTitle: currentStepTitle,
+    headerDescription:
+      currentStepDescription,
+  } = currentStepDefinition;
 
   return (
     <main
       dir="rtl"
-      className={cn("min-h-screen", "bg-[#f6f6f6]", "p-4 md:p-6")}
+      className="min-h-screen bg-background p-4 md:p-6"
     >
       {/* Top header */}
-      <header
-        className={cn(
-          "flex min-h-20",
-          "items-center justify-between",
-          "rounded-3xl bg-white",
-          "px-6 shadow-sm",
-          "md:px-8",
-        )}
-      >
+      <header className="flex min-h-20 items-center justify-between rounded-3xl bg-surface px-6 shadow-sm md:px-8">
         <div className="flex items-center gap-3">
-          <span className="text-lg font-bold text-[#333]">
+          <span className="text-lg font-bold text-text">
             ایجاد کمپین هوشمند
           </span>
         </div>
 
         <button
           type="button"
-          className={cn(
-            "flex items-center gap-2",
-            "text-[#ff7547]",
-            "transition-opacity",
-            "hover:opacity-75",
-          )}
+          className="flex items-center gap-2 text-primary transition-opacity hover:opacity-75"
         >
           <span>بازگشت</span>
 
@@ -228,62 +212,46 @@ export default function CampaignBuilder() {
         style={
           {
             "--sidebar-width": "370px",
-
-            "--sidebar-width-mobile": "320px",
+            "--sidebar-width-mobile":
+              "320px",
           } as CSSProperties
         }
-        className={cn(
-          "mt-6 min-h-0",
-          "w-full items-start",
-          "gap-6 bg-transparent",
-        )}
+        className="mt-6 min-h-0 w-full items-start gap-6 bg-transparent"
       >
         {/* Right sidebar */}
-        <CampaignStepsSidebar currentStep={currentStep} steps={steps} />
+        <CampaignStepsSidebar
+          currentStep={currentStep}
+          steps={steps}
+        />
 
         {/* Main content */}
-        <SidebarInset
-          className={cn("m-0 min-w-0", "flex-1 bg-transparent", "shadow-none")}
-        >
+        <SidebarInset className="m-0 min-w-0 flex-1 bg-transparent shadow-none">
           <section
             dir="rtl"
-            className={cn(
-              "min-h-200",
-              "overflow-hidden",
-              "rounded-3xl",
-              "bg-white shadow-sm",
-            )}
+            className="min-h-200 overflow-hidden rounded-3xl bg-surface shadow-sm"
           >
             {/* Dynamic step header */}
-            <div
-              className={cn(
-                "flex items-start",
-                " gap-5",
-                "border-b",
-                "border-[#ededed]",
-                "px-6 py-8",
-                "md:px-8",
-              )}
-            >
-               <CurrentStepIcon
+            <div className="flex items-start gap-5 border-b border-border px-6 py-8 md:px-8">
+              <CurrentStepIcon
                 aria-hidden="true"
-                className={cn("size-7 shrink-0", "text-[#ff7547]")}
+                className="size-7 shrink-0 text-primary"
               />
+
               <div>
-                <h1 className="text-xl font-bold text-[#333]">
+                <h1 className="text-xl font-bold text-text">
                   {currentStepTitle}
                 </h1>
 
-                <p className="mt-2 text-sm leading-6 text-[#888]">
+                <p className="mt-2 text-sm leading-6 text-text-muted">
                   {currentStepDescription}
                 </p>
               </div>
-
-             
             </div>
 
             {/* Selected step */}
-            <CurrentStepContent currentStep={currentStep} />
+            <CurrentStepContent
+              currentStep={currentStep}
+            />
           </section>
         </SidebarInset>
       </SidebarProvider>

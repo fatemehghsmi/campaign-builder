@@ -1,10 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
-import {
-  CalendarDays,
-} from "lucide-react";
+import { CalendarDays } from "lucide-react";
 
 import DatePicker, {
   DateObject,
@@ -17,13 +13,10 @@ import {
   Controller,
   useForm,
   useWatch,
-  type FieldErrors,
   type SubmitHandler,
 } from "react-hook-form";
 
-import {
-  zodResolver,
-} from "@hookform/resolvers/zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,9 +41,6 @@ import {
 
 import { cn } from "@/lib/utils";
 
-/* -------------------------------------------------------------------------- */
-/*                              Default values                                */
-/* -------------------------------------------------------------------------- */
 
 const EMPTY_SCHEDULE: ScheduleFormValues = {
   startDate: "",
@@ -64,14 +54,11 @@ const EMPTY_SCHEDULE: ScheduleFormValues = {
   endSecond: "",
 };
 
+
 /* -------------------------------------------------------------------------- */
-/*                              Date helpers                                  */
+/*                                  Helpers                                   */
 /* -------------------------------------------------------------------------- */
 
-/**
- * Converts a stored Gregorian YYYY-MM-DD string
- * to an independent JavaScript Date.
- */
 function isoDateToLocalDate(
   value: string,
 ): Date | undefined {
@@ -83,11 +70,7 @@ function isoDateToLocalDate(
     .split("-")
     .map(Number);
 
-  if (
-    !year ||
-    !month ||
-    !day
-  ) {
+  if (!year || !month || !day) {
     return undefined;
   }
 
@@ -97,24 +80,16 @@ function isoDateToLocalDate(
     day,
   );
 
-  if (
-    Number.isNaN(date.getTime())
-  ) {
-    return undefined;
-  }
-
-  return date;
+  return Number.isNaN(date.getTime())
+    ? undefined
+    : date;
 }
 
-/**
- * Converts the selected Persian DateObject
- * to a Gregorian YYYY-MM-DD string.
- */
+
 function dateObjectToIsoDate(
   dateObject: DateObject,
 ): string {
-  const date =
-    dateObject.toDate();
+  const date = dateObject.toDate();
 
   const year = String(
     date.getFullYear(),
@@ -131,11 +106,8 @@ function dateObjectToIsoDate(
   return `${year}-${month}-${day}`;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                              Time helpers                                  */
-/* -------------------------------------------------------------------------- */
 
-function convertPersianNumbers(
+function normalizeTimeInput(
   value: string,
 ): string {
   const persianNumbers =
@@ -162,19 +134,14 @@ function convertPersianNumbers(
             character,
           ),
         ),
-    );
-}
-
-function normalizeTimeInput(
-  value: string,
-): string {
-  return convertPersianNumbers(value)
+    )
     .replace(/\D/g, "")
     .slice(0, 2);
 }
 
+
 /* -------------------------------------------------------------------------- */
-/*                         Persian calendar field                             */
+/*                                Date field                                  */
 /* -------------------------------------------------------------------------- */
 
 interface DateFieldProps {
@@ -183,86 +150,79 @@ interface DateFieldProps {
   value: string;
 
   required?: boolean;
-  disabled?: boolean;
-
   minimumDate?: string;
 
   error?: string;
 
-  onChange: (value: string) => void;
+  onChange: (
+    value: string,
+  ) => void;
+
   onBlur: () => void;
 }
+
 
 function DateField({
   id,
   label,
   value,
   required = false,
-  disabled = false,
   minimumDate,
   error,
   onChange,
   onBlur,
 }: DateFieldProps) {
-  const pickerValue =
-    isoDateToLocalDate(value);
-
-  const pickerMinimumDate =
-    minimumDate
-      ? isoDateToLocalDate(
-          minimumDate,
-        )
-      : undefined;
-
   return (
     <div>
       <Label
         htmlFor={id}
-        className="mb-3 block text-right font-medium text-[#444]"
+        className="mb-3 block text-right font-medium text-text"
       >
         {label}
 
         {required && (
-          <span className="mr-1 text-red-500">
+          <span className="mr-1 text-danger">
             *
           </span>
         )}
       </Label>
 
       <DatePicker
-        /*
-         * The unique key keeps the start and end
-         * calendars completely independent.
-         */
         key={id}
-        value={pickerValue}
-        minDate={pickerMinimumDate}
+        value={
+          isoDateToLocalDate(
+            value,
+          )
+        }
+        minDate={
+          minimumDate
+            ? isoDateToLocalDate(
+                minimumDate,
+              )
+            : undefined
+        }
         calendar={persian}
         locale={persianFa}
         format="YYYY/MM/DD"
         calendarPosition="bottom-right"
         editable={false}
-        disabled={disabled}
         containerClassName="w-full"
         onChange={(selectedDate) => {
           if (
             !selectedDate ||
-            Array.isArray(selectedDate)
+            Array.isArray(
+              selectedDate,
+            )
           ) {
             onChange("");
             return;
           }
 
-          const isoDate =
+          onChange(
             dateObjectToIsoDate(
               selectedDate,
-            );
-
-          /*
-           * This updates only the Controller
-           * belonging to this DateField.
-           */
-          onChange(isoDate);
+            ),
+          );
         }}
         onClose={onBlur}
         render={(
@@ -272,61 +232,39 @@ function DateField({
           <button
             id={id}
             type="button"
-            disabled={disabled}
-            onClick={() => {
-              if (!disabled) {
-                openCalendar();
-              }
-            }}
-            aria-invalid={Boolean(error)}
+            onClick={openCalendar}
+            aria-invalid={!!error}
             className={cn(
-              "flex h-[52px] w-full",
-              "items-center justify-between",
-              "rounded-2xl border",
-              "px-5 text-sm transition",
+              "flex h-[52px] w-full items-center justify-between",
+              "rounded-2xl border bg-surface px-5 text-sm",
+              "transition hover:border-primary",
+              "focus:border-primary focus:outline-none",
+              "focus:ring-2 focus:ring-primary/15",
 
-              error
-                ? "border-red-500"
-                : "border-[#dedede]",
+              {
+                "border-danger":
+                  !!error,
 
-              disabled
-                ? [
-                    "cursor-not-allowed",
-                    "bg-[#f7f7f7]",
-                    "text-[#aaa]",
-                  ]
-                : [
-                    "cursor-pointer",
-                    "bg-white",
-                    "hover:border-[#ff7c4d]",
-                    "focus:border-[#ff7c4d]",
-                    "focus:outline-none",
-                    "focus:ring-2",
-                    "focus:ring-[#ff7c4d]/15",
-                  ],
+                "border-border-strong":
+                  !error,
+              },
             )}
           >
             <span
               dir="rtl"
-              className={cn(
-                formattedValue
-                  ? "text-[#555]"
-                  : "text-[#aaa]",
-              )}
+              className={cn({
+                "text-text":
+                  !!formattedValue,
+
+                "text-text-disabled":
+                  !formattedValue,
+              })}
             >
               {formattedValue ||
                 "انتخاب کنید"}
             </span>
 
-            <CalendarDays
-              className={cn(
-                "size-5",
-
-                disabled
-                  ? "text-[#aaa]"
-                  : "text-[#777]",
-              )}
-            />
+            <CalendarDays className="size-5 text-text-muted" />
           </button>
         )}
       />
@@ -334,7 +272,7 @@ function DateField({
       {error && (
         <p
           role="alert"
-          className="mt-2 text-sm text-red-500"
+          className="mt-2 text-sm text-danger"
         >
           {error}
         </p>
@@ -343,8 +281,9 @@ function DateField({
   );
 }
 
+
 /* -------------------------------------------------------------------------- */
-/*                              Time field                                    */
+/*                                Time field                                  */
 /* -------------------------------------------------------------------------- */
 
 interface TimeSegmentProps {
@@ -354,9 +293,13 @@ interface TimeSegmentProps {
   disabled?: boolean;
   hasError?: boolean;
 
-  onChange: (value: string) => void;
+  onChange: (
+    value: string,
+  ) => void;
+
   onBlur: () => void;
 }
+
 
 function TimeSegment({
   value,
@@ -387,49 +330,49 @@ function TimeSegment({
       onBlur={() => {
         if (value) {
           onChange(
-            value.padStart(2, "0"),
+            value.padStart(
+              2,
+              "0",
+            ),
           );
         }
 
         onBlur();
       }}
       className={cn(
-        "h-12 rounded-2xl",
-        "text-center shadow-none",
-        "placeholder:text-[#aaa]",
+        "h-12 rounded-2xl text-center shadow-none",
+        "placeholder:text-text-disabled",
+        "focus-visible:border-primary",
+        "focus-visible:ring-primary/15",
 
-        hasError
-          ? "border-red-500"
-          : "border-[#dedede]",
+        {
+          "border-danger":
+            hasError,
 
-        "focus-visible:border-[#ff7c4d]",
-        "focus-visible:ring-[#ff7c4d]/15",
+          "border-border-strong":
+            !hasError,
 
-        disabled &&
-          "bg-[#f7f7f7] text-[#aaa]",
+          "bg-background text-text-disabled":
+            disabled,
+        },
       )}
     />
   );
 }
 
+
 /* -------------------------------------------------------------------------- */
-/*                              Main component                                */
+/*                              Schedule step                                 */
 /* -------------------------------------------------------------------------- */
 
 export default function ScheduleStep() {
-  const dispatch = useAppDispatch();
-
-  const storedSchedule =
-    useAppSelector(selectSchedule);
+  const dispatch =
+    useAppDispatch();
 
   const savedSchedule =
-    storedSchedule ??
-    EMPTY_SCHEDULE;
-
-  const [
-    submitError,
-    setSubmitError,
-  ] = useState("");
+    useAppSelector(
+      selectSchedule,
+    ) ?? EMPTY_SCHEDULE;
 
   const {
     control,
@@ -446,43 +389,20 @@ export default function ScheduleStep() {
       scheduleSchema,
     ),
 
+    /*
+     * Validation starts only when
+     * the user submits the form.
+     */
     mode: "onSubmit",
 
+    /*
+     * After the first submit,
+     * errors update while fixing values.
+     */
     reValidateMode: "onChange",
 
-    defaultValues: {
-      startDate:
-        savedSchedule.startDate ??
-        "",
-
-      startHour:
-        savedSchedule.startHour ??
-        "",
-
-      startMinute:
-        savedSchedule.startMinute ??
-        "",
-
-      startSecond:
-        savedSchedule.startSecond ??
-        "",
-
-      endDate:
-        savedSchedule.endDate ??
-        "",
-
-      endHour:
-        savedSchedule.endHour ??
-        "",
-
-      endMinute:
-        savedSchedule.endMinute ??
-        "",
-
-      endSecond:
-        savedSchedule.endSecond ??
-        "",
-    },
+    defaultValues:
+      savedSchedule,
   });
 
   const startDate =
@@ -510,32 +430,27 @@ export default function ScheduleStep() {
     errors.endMinute?.message ||
     errors.endSecond?.message;
 
+
+  /* ------------------------------------------------------------------------ */
+  /*                              Next button                                 */
+  /* ------------------------------------------------------------------------ */
+
   const handleValidSubmit: SubmitHandler<
     ScheduleFormValues
   > = (values) => {
-    setSubmitError("");
-
     dispatch(
       scheduleSaved(values),
     );
 
-    dispatch(nextStep());
+    dispatch(
+      nextStep(),
+    );
   };
 
-  function handleInvalidSubmit(
-    validationErrors: FieldErrors<
-      ScheduleFormValues
-    >,
-  ) {
-    console.error(
-      "Schedule validation errors:",
-      validationErrors,
-    );
 
-    setSubmitError(
-      "لطفاً خطاهای فرم را بررسی کنید.",
-    );
-  }
+  /* ------------------------------------------------------------------------ */
+  /*                              Save draft                                  */
+  /* ------------------------------------------------------------------------ */
 
   function handleSaveDraft() {
     dispatch(
@@ -545,21 +460,10 @@ export default function ScheduleStep() {
     );
   }
 
-  function handleStartDateChange(
-    value: string,
-    onChange: (
-      value: string,
-    ) => void,
-  ) {
-    /*
-     * Only the start date is updated.
-     * The end date is not modified.
-     */
-    onChange(value);
 
-    clearErrors("startDate");
-    setSubmitError("");
-  }
+  /* ------------------------------------------------------------------------ */
+  /*                               End date                                   */
+  /* ------------------------------------------------------------------------ */
 
   function handleEndDateChange(
     value: string,
@@ -567,69 +471,47 @@ export default function ScheduleStep() {
       value: string,
     ) => void,
   ) {
-    /*
-     * Only the end date is updated.
-     */
     onChange(value);
 
-    clearErrors("endDate");
-    setSubmitError("");
-
-    /*
-     * End times are cleared only when
-     * the user removes the end date.
-     */
-    if (!value) {
-      setValue(
-        "endHour",
-        "",
-        {
-          shouldDirty: true,
-          shouldValidate: false,
-        },
-      );
-
-      setValue(
-        "endMinute",
-        "",
-        {
-          shouldDirty: true,
-          shouldValidate: false,
-        },
-      );
-
-      setValue(
-        "endSecond",
-        "",
-        {
-          shouldDirty: true,
-          shouldValidate: false,
-        },
-      );
-
-      clearErrors([
-        "endHour",
-        "endMinute",
-        "endSecond",
-      ]);
+    if (value) {
+      return;
     }
+
+    const endTimeFields = [
+      "endHour",
+      "endMinute",
+      "endSecond",
+    ] as const;
+
+    endTimeFields.forEach(
+      (field) => {
+        setValue(
+          field,
+          "",
+          {
+            shouldDirty: true,
+            shouldValidate: false,
+          },
+        );
+      },
+    );
+
+    clearErrors(
+      endTimeFields,
+    );
   }
+
 
   return (
     <form
       onSubmit={handleSubmit(
         handleValidSubmit,
-        handleInvalidSubmit,
       )}
       noValidate
-      className={cn(
-        "mx-auto flex w-full",
-        "min-h-[700px]",
-        "max-w-[800px] flex-col",
-        "px-6 py-12",
-      )}
+      className="mx-auto flex min-h-[700px] w-full max-w-[800px] flex-col px-6 py-12"
     >
       <div className="mx-auto w-full max-w-[520px]">
+
         {/* Start date */}
         <Controller
           control={control}
@@ -641,36 +523,31 @@ export default function ScheduleStep() {
               required
               value={field.value}
               error={
-                errors.startDate?.message
+                errors.startDate
+                  ?.message
               }
-              onChange={(value) => {
-                handleStartDateChange(
-                  value,
-                  field.onChange,
-                );
-              }}
+              onChange={
+                field.onChange
+              }
               onBlur={field.onBlur}
             />
           )}
         />
 
+
         {/* Start time */}
         <div className="mt-7">
-          <Label className="mb-3 block text-right font-medium text-[#444]">
+          <Label className="mb-3 block text-right font-medium text-text">
             زمان شروع
 
-            <span className="mr-1 text-red-500">
+            <span className="mr-1 text-danger">
               *
             </span>
           </Label>
 
           <div
             dir="ltr"
-            className={cn(
-              "grid",
-              "grid-cols-[1fr_auto_1fr_auto_1fr]",
-              "items-center gap-3",
-            )}
+            className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-3"
           >
             <Controller
               control={control}
@@ -679,19 +556,18 @@ export default function ScheduleStep() {
                 <TimeSegment
                   value={field.value}
                   placeholder="ساعت"
-                  hasError={Boolean(
-                    errors.startHour,
-                  )}
-                  onChange={(value) => {
-                    field.onChange(value);
-                    setSubmitError("");
-                  }}
+                  hasError={
+                    !!errors.startHour
+                  }
+                  onChange={
+                    field.onChange
+                  }
                   onBlur={field.onBlur}
                 />
               )}
             />
 
-            <span className="text-lg text-[#777]">
+            <span className="text-lg text-text-muted">
               :
             </span>
 
@@ -702,19 +578,18 @@ export default function ScheduleStep() {
                 <TimeSegment
                   value={field.value}
                   placeholder="دقیقه"
-                  hasError={Boolean(
-                    errors.startMinute,
-                  )}
-                  onChange={(value) => {
-                    field.onChange(value);
-                    setSubmitError("");
-                  }}
+                  hasError={
+                    !!errors.startMinute
+                  }
+                  onChange={
+                    field.onChange
+                  }
                   onBlur={field.onBlur}
                 />
               )}
             />
 
-            <span className="text-lg text-[#777]">
+            <span className="text-lg text-text-muted">
               :
             </span>
 
@@ -725,13 +600,12 @@ export default function ScheduleStep() {
                 <TimeSegment
                   value={field.value}
                   placeholder="ثانیه"
-                  hasError={Boolean(
-                    errors.startSecond,
-                  )}
-                  onChange={(value) => {
-                    field.onChange(value);
-                    setSubmitError("");
-                  }}
+                  hasError={
+                    !!errors.startSecond
+                  }
+                  onChange={
+                    field.onChange
+                  }
                   onBlur={field.onBlur}
                 />
               )}
@@ -741,14 +615,16 @@ export default function ScheduleStep() {
           {startTimeError && (
             <p
               role="alert"
-              className="mt-2 text-sm text-red-500"
+              className="mt-2 text-sm text-danger"
             >
               {startTimeError}
             </p>
           )}
         </div>
 
-        <div className="my-7 h-px bg-[#ededed]" />
+
+        <div className="my-7 h-px bg-border" />
+
 
         {/* End date */}
         <Controller
@@ -759,9 +635,12 @@ export default function ScheduleStep() {
               id="campaign-end-date"
               label="تاریخ پایان"
               value={field.value}
-              minimumDate={startDate}
+              minimumDate={
+                startDate
+              }
               error={
-                errors.endDate?.message
+                errors.endDate
+                  ?.message
               }
               onChange={(value) => {
                 handleEndDateChange(
@@ -774,19 +653,16 @@ export default function ScheduleStep() {
           )}
         />
 
+
         {/* End time */}
         <div className="mt-7">
-          <Label className="mb-3 block text-right font-medium text-[#444]">
+          <Label className="mb-3 block text-right font-medium text-text">
             زمان پایان
           </Label>
 
           <div
             dir="ltr"
-            className={cn(
-              "grid",
-              "grid-cols-[1fr_auto_1fr_auto_1fr]",
-              "items-center gap-3",
-            )}
+            className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-3"
           >
             <Controller
               control={control}
@@ -798,10 +674,12 @@ export default function ScheduleStep() {
                   disabled={
                     isEndTimeDisabled
                   }
-                  hasError={Boolean(
-                    errors.endHour,
-                  )}
-                  onChange={field.onChange}
+                  hasError={
+                    !!errors.endHour
+                  }
+                  onChange={
+                    field.onChange
+                  }
                   onBlur={field.onBlur}
                 />
               )}
@@ -810,10 +688,13 @@ export default function ScheduleStep() {
             <span
               className={cn(
                 "text-lg",
+                {
+                  "text-text-disabled-strong":
+                    isEndTimeDisabled,
 
-                isEndTimeDisabled
-                  ? "text-[#bbb]"
-                  : "text-[#777]",
+                  "text-text-muted":
+                    !isEndTimeDisabled,
+                },
               )}
             >
               :
@@ -829,10 +710,12 @@ export default function ScheduleStep() {
                   disabled={
                     isEndTimeDisabled
                   }
-                  hasError={Boolean(
-                    errors.endMinute,
-                  )}
-                  onChange={field.onChange}
+                  hasError={
+                    !!errors.endMinute
+                  }
+                  onChange={
+                    field.onChange
+                  }
                   onBlur={field.onBlur}
                 />
               )}
@@ -841,10 +724,13 @@ export default function ScheduleStep() {
             <span
               className={cn(
                 "text-lg",
+                {
+                  "text-text-disabled-strong":
+                    isEndTimeDisabled,
 
-                isEndTimeDisabled
-                  ? "text-[#bbb]"
-                  : "text-[#777]",
+                  "text-text-muted":
+                    !isEndTimeDisabled,
+                },
               )}
             >
               :
@@ -860,10 +746,12 @@ export default function ScheduleStep() {
                   disabled={
                     isEndTimeDisabled
                   }
-                  hasError={Boolean(
-                    errors.endSecond,
-                  )}
-                  onChange={field.onChange}
+                  hasError={
+                    !!errors.endSecond
+                  }
+                  onChange={
+                    field.onChange
+                  }
                   onBlur={field.onBlur}
                 />
               )}
@@ -873,46 +761,27 @@ export default function ScheduleStep() {
           {endTimeError && (
             <p
               role="alert"
-              className="mt-2 text-sm text-red-500"
+              className="mt-2 text-sm text-danger"
             >
               {endTimeError}
             </p>
           )}
         </div>
-
-        {submitError && (
-          <div
-            role="alert"
-            className={cn(
-              "mt-7 rounded-2xl",
-              "border border-red-200",
-              "bg-red-50 px-4 py-3",
-              "text-sm text-red-600",
-            )}
-          >
-            {submitError}
-          </div>
-        )}
       </div>
 
-      {/* Bottom actions */}
+
+      {/* Actions */}
       <div
         dir="ltr"
-        className={cn(
-          "mt-auto flex flex-wrap",
-          "items-center justify-between",
-          "gap-4 pt-14",
-        )}
+        className="mt-auto flex flex-wrap items-center justify-between gap-4 pt-14"
       >
         <Button
           type="button"
           variant="ghost"
-          onClick={handleSaveDraft}
-          className={cn(
-            "text-[#ff7c4d]",
-            "hover:bg-[#fff5f1]",
-            "hover:text-[#ff7c4d]",
-          )}
+          onClick={
+            handleSaveDraft
+          }
+          className="text-primary hover:bg-primary-soft hover:text-primary"
         >
           ذخیره پیش‌نویس
         </Button>
@@ -922,27 +791,18 @@ export default function ScheduleStep() {
             type="button"
             variant="outline"
             onClick={() => {
-              dispatch(previousStep());
+              dispatch(
+                previousStep(),
+              );
             }}
-            className={cn(
-              "h-12 min-w-44",
-              "rounded-2xl",
-              "border-[#dedede]",
-              "bg-white text-[#555]",
-            )}
+            className="h-12 min-w-44 rounded-2xl border-border-strong bg-surface text-text"
           >
             قبلی
           </Button>
 
           <Button
             type="submit"
-            className={cn(
-              "h-12 min-w-44",
-              "rounded-2xl",
-              "bg-[#ff7c4d]",
-              "font-bold text-white",
-              "hover:bg-[#f16e40]",
-            )}
+            className="h-12 min-w-44 rounded-2xl bg-primary font-bold text-white hover:bg-primary-hover"
           >
             ادامه
           </Button>

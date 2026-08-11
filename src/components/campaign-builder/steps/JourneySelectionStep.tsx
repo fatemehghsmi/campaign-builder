@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useMemo,
-  useState,
-} from "react";
+import { useState } from "react";
 
 import {
   ExternalLink,
@@ -12,16 +9,20 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/components/ui/radio-group";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import {
@@ -43,16 +44,19 @@ import {
 
 import { cn } from "@/lib/utils";
 
+
 interface JourneyCardProps {
   journey: CustomerJourney;
   isSelected: boolean;
 }
 
+
 function JourneyCard({
   journey,
   isSelected,
 }: JourneyCardProps) {
-  const inputId = `journey-${journey.id}`;
+  const inputId =
+    `journey-${journey.id}`;
 
   return (
     <div className="relative h-full">
@@ -72,23 +76,18 @@ function JourneyCard({
             "rounded-2xl border py-0 shadow-none",
             "ring-0 transition-all duration-200",
 
-            isSelected
-              ? [
-                  "border-[#ff7c4d]",
-                  "bg-[#fff8f5]",
-                  "shadow-[0_0_0_2px_rgba(255,124,77,0.08)]",
-                ]
-              : [
-                  "border-[#e5e5e5]",
-                  "bg-white",
-                  "hover:border-[#ff7c4d]/60",
-                  "hover:shadow-sm",
-                ],
+            {
+              "border-primary bg-primary-soft shadow-[0_0_0_2px_rgba(243,131,83,0.08)]":
+                isSelected,
+
+              "border-border bg-surface hover:border-primary/60 hover:shadow-sm":
+                !isSelected,
+            },
           )}
         >
           <ExternalLink
             aria-hidden="true"
-            className="absolute inset-e-4 top-4 size-5 text-[#ff7c4d]"
+            className="absolute inset-e-4 top-4 size-5 text-primary"
           />
 
           <CardContent className="flex h-full flex-col items-center justify-center p-4 pt-7 text-center">
@@ -99,11 +98,11 @@ function JourneyCard({
               {journey.icon}
             </span>
 
-            <h3 className="mt-2 font-bold text-[#4a4a4a]">
+            <h3 className="mt-2 font-bold text-text">
               {journey.title}
             </h3>
 
-            <p className="mt-1 text-xs text-[#929292]">
+            <p className="mt-1 text-xs text-text-muted">
               {journey.description}
             </p>
           </CardContent>
@@ -113,47 +112,38 @@ function JourneyCard({
   );
 }
 
+
 export default function JourneySelectionStep() {
-  const dispatch = useAppDispatch();
+  const dispatch =
+    useAppDispatch();
 
-  const selectedJourneyId = useAppSelector(
-    selectSelectedJourneyId,
-  );
-
-  const [searchText, setSearchText] =
-    useState("");
-
-  const filteredJourneys = useMemo(() => {
-    const normalizedSearch =
-      searchText.trim().toLocaleLowerCase("fa");
-
-    if (!normalizedSearch) {
-      return customerJourneys;
-    }
-
-    return customerJourneys.filter(
-      (journey) => {
-        const searchableText =
-          `${journey.title} ${journey.description}`
-            .toLocaleLowerCase("fa");
-
-        return searchableText.includes(
-          normalizedSearch,
-        );
-      },
+  const selectedJourneyId =
+    useAppSelector(
+      selectSelectedJourneyId,
     );
-  }, [searchText]);
 
-  const canContinue =
-    selectedJourneyId !== null;
+  const [
+    searchText,
+    setSearchText,
+  ] = useState("");
 
-  function handleJourneyChange(
-    journeyId: string,
-  ) {
-    dispatch(
-      journeySelected(journeyId),
-    );
-  }
+  const normalizedSearch =
+    searchText
+      .trim()
+      .toLocaleLowerCase("fa");
+
+  const filteredJourneys =
+    normalizedSearch
+      ? customerJourneys.filter(
+          (journey) =>
+            `${journey.title} ${journey.description}`
+              .toLocaleLowerCase("fa")
+              .includes(
+                normalizedSearch,
+              ),
+        )
+      : customerJourneys;
+
 
   function handleContinue() {
     if (!selectedJourneyId) {
@@ -163,19 +153,22 @@ export default function JourneySelectionStep() {
     dispatch(nextStep());
   }
 
+
   function handleCreateNewJourney() {
     window.alert(
       "ساخت سفر جدید را بعداً به API متصل می‌کنیم.",
     );
   }
 
+
   return (
     <div className="mx-auto flex min-h-152.5 w-full max-w-197.5 flex-col px-6 py-12">
+
       {/* Search */}
       <div className="relative">
         <Search
           aria-hidden="true"
-          className="pointer-events-none absolute inset-s-4 top-1/2 size-5 -translate-y-1/2 text-[#666]"
+          className="pointer-events-none absolute inset-s-4 top-1/2 size-5 -translate-y-1/2 text-text-muted"
         />
 
         <Input
@@ -188,34 +181,27 @@ export default function JourneySelectionStep() {
           }}
           placeholder="جستجو..."
           aria-label="جستجوی سفر مشتری"
-          className={cn(
-            "h-12 rounded-2xl border-[#dedede]",
-            "bg-white ps-12 text-right",
-            "shadow-none",
-            "focus-visible:border-[#ff7c4d]",
-            "focus-visible:ring-[#ff7c4d]/15",
-          )}
+          className="h-12 rounded-2xl border-border-strong bg-surface ps-12 text-right shadow-none focus-visible:border-primary focus-visible:ring-primary/15"
         />
       </div>
 
-      {/* Scrollable journey cards */}
-     <ScrollArea
-  dir="ltr"
-  className={cn(
-    "mt-7 h-110 pe-4",
 
-    // Vertical scrollbar track
-    "**:data-[slot=scroll-area-scrollbar]:w-2",
-    "**:data-[slot=scroll-area-scrollbar]:rounded-full",
-    "**:data-[slot=scroll-area-scrollbar]:bg-[#e8e8e8]",
-    "**:data-[slot=scroll-area-scrollbar]:p-0",
+      {/* Journey cards */}
+      <ScrollArea
+        dir="ltr"
+        className="
+          mt-7 h-110 pe-4
 
-    // Orange scrollbar thumb
-    "**:data-[slot=scroll-area-thumb]:rounded-full",
-    "**:data-[slot=scroll-area-thumb]:bg-[#ff7c4d]",
-    "**:data-[slot=scroll-area-thumb]:min-h-30",
-  )}
->
+          **:data-[slot=scroll-area-scrollbar]:w-2
+          **:data-[slot=scroll-area-scrollbar]:rounded-full
+          **:data-[slot=scroll-area-scrollbar]:bg-border
+          **:data-[slot=scroll-area-scrollbar]:p-0
+
+          **:data-[slot=scroll-area-thumb]:min-h-30
+          **:data-[slot=scroll-area-thumb]:rounded-full
+          **:data-[slot=scroll-area-thumb]:bg-primary
+        "
+      >
         <div
           dir="rtl"
           className="pe-3 pb-4"
@@ -223,11 +209,16 @@ export default function JourneySelectionStep() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <RadioGroup
               value={
-                selectedJourneyId ?? ""
+                selectedJourneyId ??
+                ""
               }
-              onValueChange={
-                handleJourneyChange
-              }
+              onValueChange={(journeyId) => {
+                dispatch(
+                  journeySelected(
+                    journeyId,
+                  ),
+                );
+              }}
               className="contents"
               aria-label="انتخاب سفر مشتری"
             >
@@ -251,15 +242,15 @@ export default function JourneySelectionStep() {
               onClick={
                 handleCreateNewJourney
               }
-              className={cn(
-                "h-33 rounded-2xl",
-                "border-dashed border-[#ffb79d]",
-                "bg-white text-[#555]",
-                "shadow-none",
-                "hover:border-[#ff7c4d]",
-                "hover:bg-[#fff8f5]",
-                "hover:text-[#ff7c4d]",
-              )}
+              className="
+                h-33 rounded-2xl
+                border-dashed border-primary/40
+                bg-surface text-text
+                shadow-none
+                hover:border-primary
+                hover:bg-primary-soft
+                hover:text-primary
+              "
             >
               <span className="flex flex-col items-center gap-3">
                 <Plus
@@ -276,14 +267,15 @@ export default function JourneySelectionStep() {
 
           {filteredJourneys.length ===
             0 && (
-            <div className="flex h-52 items-center justify-center text-sm text-[#999]">
+            <div className="flex h-52 items-center justify-center text-sm text-text-subtle">
               سفری با این عنوان پیدا نشد.
             </div>
           )}
         </div>
       </ScrollArea>
 
-      {/* Bottom actions */}
+
+      {/* Actions */}
       <div
         dir="ltr"
         className="mt-auto flex flex-wrap items-center justify-between gap-4 pt-8"
@@ -291,7 +283,7 @@ export default function JourneySelectionStep() {
         <Button
           type="button"
           variant="ghost"
-          className="text-[#ff7c4d] hover:bg-[#fff5f1] hover:text-[#ff7c4d]"
+          className="text-primary hover:bg-primary-soft hover:text-primary"
         >
           ذخیره پیش‌نویس
         </Button>
@@ -301,24 +293,24 @@ export default function JourneySelectionStep() {
             type="button"
             variant="outline"
             onClick={() => {
-              dispatch(previousStep());
+              dispatch(
+                previousStep(),
+              );
             }}
-            className="h-12 min-w-48 rounded-2xl border-[#dedede] bg-white text-[#555]"
+            className="h-12 min-w-48 rounded-2xl border-border-strong bg-surface text-text"
           >
             قبلی
           </Button>
 
           <Button
             type="button"
-            disabled={!canContinue}
-            onClick={handleContinue}
-            className={cn(
-              "h-12 min-w-48 rounded-2xl",
-              "bg-[#ff7c4d] font-bold",
-              "text-white",
-              "hover:bg-[#f16e40]",
-              "disabled:opacity-40",
-            )}
+            disabled={
+              !selectedJourneyId
+            }
+            onClick={
+              handleContinue
+            }
+            className="h-12 min-w-48 rounded-2xl bg-primary font-bold text-white hover:bg-primary-hover disabled:opacity-40"
           >
             ادامه
           </Button>

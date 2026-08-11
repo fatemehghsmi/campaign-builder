@@ -1,15 +1,12 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-  type FormEvent,
-} from "react";
+import { useEffect, useState } from "react";
 
 import { Star, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   Dialog,
   DialogContent,
@@ -17,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -31,7 +29,9 @@ interface AddLinkDialogProps {
   open: boolean;
   initialUrl?: string;
   initialUniquePerCustomer?: boolean;
+
   onOpenChange: (open: boolean) => void;
+
   onAddLink: (link: AddedLink) => void;
 }
 
@@ -39,10 +39,7 @@ function isValidHttpUrl(value: string): boolean {
   try {
     const parsedUrl = new URL(value);
 
-    return (
-      parsedUrl.protocol === "http:" ||
-      parsedUrl.protocol === "https:"
-    );
+    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
   } catch {
     return false;
   }
@@ -57,10 +54,9 @@ export default function AddLinkDialog({
 }: AddLinkDialogProps) {
   const [url, setUrl] = useState(initialUrl);
 
-  const [
-    uniquePerCustomer,
-    setUniquePerCustomer,
-  ] = useState(initialUniquePerCustomer);
+  const [uniquePerCustomer, setUniquePerCustomer] = useState(
+    initialUniquePerCustomer,
+  );
 
   const [error, setError] = useState("");
 
@@ -70,75 +66,63 @@ export default function AddLinkDialog({
     }
 
     setUrl(initialUrl);
-    setUniquePerCustomer(
-      initialUniquePerCustomer,
-    );
+
+    setUniquePerCustomer(initialUniquePerCustomer);
+
     setError("");
-  }, [
-    open,
-    initialUrl,
-    initialUniquePerCustomer,
-  ]);
+  }, [open, initialUrl, initialUniquePerCustomer]);
 
   function handleClose() {
     setError("");
+
     onOpenChange(false);
   }
 
-function handleSubmit(
-  event: FormEvent<HTMLFormElement>,
-) {
-  event.preventDefault();
+  function handleSubmit() {
+    const normalizedUrl = url.trim();
 
-  const normalizedUrl = url.trim();
+    if (!normalizedUrl) {
+      setError("وارد کردن لینک الزامی است");
 
-  if (!normalizedUrl) {
-    setError("وارد کردن لینک الزامی است");
-    return;
+      return;
+    }
+
+    if (!isValidHttpUrl(normalizedUrl)) {
+      setError("لینک باید با http:// یا https:// شروع شود");
+
+      return;
+    }
+
+    onAddLink({
+      url: normalizedUrl,
+      uniquePerCustomer,
+    });
   }
-
-  if (!isValidHttpUrl(normalizedUrl)) {
-    setError(
-      "لینک باید با http:// یا https:// شروع شود",
-    );
-    return;
-  }
-
-  onAddLink({
-    url: normalizedUrl,
-    uniquePerCustomer,
-  });
-}
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         dir="rtl"
-        className={cn(
-          // Hide the default shadcn close button.
-          "[&>button]:hidden",
-
-          "w-[calc(100%-32px)]",
-          "gap-0 overflow-hidden",
-          "rounded-[28px] border-0",
-          "bg-white p-0",
-          "shadow-[0_24px_90px_rgba(0,0,0,0.2)]",
-          "sm:max-w-117.5",
-        )}
+        className="
+          [&>button]:hidden
+          w-[calc(100%-32px)]
+          gap-0 overflow-hidden
+          rounded-[28px] border-0
+          bg-surface p-0
+          shadow-[0_24px_90px_rgba(0,0,0,0.2)]
+          sm:max-w-117.5
+        "
       >
         <DialogHeader
-          className={cn(
-            "relative flex h-22",
-            "items-center justify-center",
-            "border-b border-[#eeeeee]",
-            "px-8 text-center",
-            "sm:text-center",
-          )}
+          className="
+            relative flex h-22
+            items-center justify-center
+            border-b border-border
+            px-8 text-center
+            sm:text-center
+          "
         >
-          <DialogTitle className="text-base font-bold text-[#414141]">
+          <DialogTitle className="text-base font-bold text-text">
             افزودن لینک به پیام
           </DialogTitle>
 
@@ -150,37 +134,38 @@ function handleSubmit(
             type="button"
             aria-label="بستن"
             onClick={handleClose}
-            className={cn(
-              "absolute left-7 top-1/2",
-              "flex size-12",
-              "-translate-y-1/2",
-              "items-center justify-center",
-              "rounded-2xl border",
-              "border-[#e4e4e4]",
-              "bg-white text-[#555]",
-              "shadow-sm transition",
-
-              "hover:bg-[#f8f8f8]",
-            )}
+            className="
+              absolute left-7 top-1/2
+              flex size-12
+              -translate-y-1/2
+              items-center justify-center
+              rounded-2xl
+              border border-border
+              bg-surface
+              text-text
+              shadow-sm
+              transition
+              hover:bg-background
+            "
           >
             <X className="size-5" />
           </button>
         </DialogHeader>
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleSubmit();
+          }}
           noValidate
         >
           <div className="px-8 pb-7 pt-8">
             <Label
               htmlFor="campaign-message-link"
-              className="mb-3 block text-right font-medium text-[#444]"
+              className="mb-3 block text-right font-medium text-text"
             >
               لینک
-
-              <span className="mr-1 text-red-500">
-                *
-              </span>
+              <span className="mr-1 text-danger">*</span>
             </Label>
 
             <Input
@@ -201,96 +186,68 @@ function handleSubmit(
                 "h-12 rounded-2xl",
                 "px-5 text-left",
                 "text-[15px] shadow-none",
+                "focus-visible:border-primary",
+                "focus-visible:ring-primary/15",
 
-                error
-                  ? "border-red-500"
-                  : "border-[#dedede]",
+                {
+                  "border-danger": !!error,
 
-                "focus-visible:border-[#ff7c4d]",
-                "focus-visible:ring-[#ff7c4d]/15",
+                  "border-border-strong": !error,
+                },
               )}
             />
 
             {error ? (
-              <p
-                role="alert"
-                className="mt-2 text-right text-xs text-red-500"
-              >
+              <p role="alert" className="mt-2 text-right text-xs text-danger">
                 {error}
               </p>
             ) : (
-              <p className="mt-2 text-right text-xs text-[#999]">
-                لینک باید به همراه http یا https
-                باشد.
+              <p className="mt-2 text-right text-xs text-text-subtle">
+                لینک باید به همراه http یا https باشد.
               </p>
             )}
 
-            <div
-              dir="rtl"
-              className={cn(
-                "mt-8 flex min-h-12",
-                "items-center gap-3",
-              )}
-            >
+            <div dir="rtl" className="mt-8 flex min-h-12 items-center gap-3">
               <Checkbox
                 id="unique-customer-link"
                 checked={uniquePerCustomer}
                 onCheckedChange={(checked) => {
-                  setUniquePerCustomer(
-                    checked === true,
-                  );
+                  setUniquePerCustomer(checked === true);
                 }}
-                className={cn(
-                  "size-6 rounded-md",
-                  "border-2 border-[#bdbdbd]",
-
-                  "data-[state=checked]:border-[#ff7c4d]",
-                  "data-[state=checked]:bg-[#ff7c4d]",
-                )}
+                className="
+                  size-6 rounded-md
+                  border-2 border-border-muted
+                  data-[state=checked]:border-primary
+                  data-[state=checked]:bg-primary
+                "
               />
 
               <Label
                 htmlFor="unique-customer-link"
-                className={cn(
-                  "flex-1 cursor-pointer",
-                  "text-right font-medium",
-                  "text-[#444]",
-                )}
+                className="flex-1 cursor-pointer text-right font-medium text-text"
               >
                 لینک یکتا برای هر شخص تولید شود
               </Label>
 
               <span
                 title="ویژگی ویژه"
-                className={cn(
-                  "flex size-6 shrink-0",
-                  "items-center justify-center",
-                  "rounded-md bg-[#ff7c4d]",
-                  "text-white",
-                )}
+                className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-white"
               >
                 <Star className="size-3 fill-current" />
               </span>
             </div>
           </div>
 
-          <div
-            dir="rtl"
-            className={cn(
-              "grid grid-cols-2 gap-4",
-              "px-8 pb-8",
-            )}
-          >
+          <div dir="rtl" className="grid grid-cols-2 gap-4 px-8 pb-8">
             <Button
               type="submit"
-              className={cn(
-                "h-12 rounded-2xl",
-                "bg-[#ff7c4d]",
-                "font-bold text-white",
-                "shadow-none",
-
-                "hover:bg-[#f16e40]",
-              )}
+              className="
+                h-12 rounded-2xl
+                bg-primary
+                font-bold text-white
+                shadow-none
+                hover:bg-primary-hover
+              "
             >
               افزودن لینک
             </Button>
@@ -299,14 +256,14 @@ function handleSubmit(
               type="button"
               variant="outline"
               onClick={handleClose}
-              className={cn(
-                "h-12 rounded-2xl",
-                "border-[#dedede]",
-                "bg-white font-bold",
-                "text-[#555] shadow-none",
-
-                "hover:bg-[#fafafa]",
-              )}
+              className="
+                h-12 rounded-2xl
+                border-border-strong
+                bg-surface
+                font-bold text-text
+                shadow-none
+                hover:bg-background
+              "
             >
               لغو
             </Button>

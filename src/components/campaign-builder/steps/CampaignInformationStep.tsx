@@ -22,42 +22,36 @@ import {
   useAppSelector,
 } from "@/lib/hooks";
 
+import { cn } from "@/lib/utils";
+
+
 export default function CampaignInformationStep() {
   const dispatch = useAppDispatch();
 
-  const savedCampaignInformation = useAppSelector(
-    selectCampaignInformation,
-  );
+  const savedCampaignInformation =
+    useAppSelector(
+      selectCampaignInformation,
+    );
 
   const {
     register,
     handleSubmit,
     getValues,
     watch,
-
-    formState: {
-      errors,
-    },
+    formState: { errors },
   } = useForm<CampaignInformationFormValues>({
     resolver: zodResolver(
       campaignInformationSchema,
     ),
-
-    mode: "onBlur",
-
-    defaultValues: {
-      campaignName:
-        savedCampaignInformation.campaignName,
-
-      description:
-        savedCampaignInformation.description,
-    },
+    mode: "onSubmit",
+    defaultValues:
+      savedCampaignInformation,
   });
 
   const description =
     watch("description") ?? "";
 
-  const handleValidSubmit: SubmitHandler<
+  const handleSubmitForm: SubmitHandler<
     CampaignInformationFormValues
   > = (values) => {
     dispatch(
@@ -67,12 +61,10 @@ export default function CampaignInformationStep() {
     dispatch(nextStep());
   };
 
-  function handleSaveLocalDraft() {
-    const currentValues = getValues();
-
+  function handleSaveDraft() {
     dispatch(
       campaignInformationSaved(
-        currentValues,
+        getValues(),
       ),
     );
   }
@@ -80,19 +72,18 @@ export default function CampaignInformationStep() {
   return (
     <form
       onSubmit={handleSubmit(
-        handleValidSubmit,
+        handleSubmitForm,
       )}
-      className="mx-auto flex min-h-152 max-w-140 flex-col px-6 py-16"
       noValidate
+      className="mx-auto flex min-h-152 max-w-140 flex-col px-6 py-16"
     >
       <div>
         <label
           htmlFor="campaign-name"
-          className="mb-2 block font-medium"
+          className="mb-2 block font-medium text-text"
         >
           نام کمپین
-
-          <span className="mr-1 text-red-500">
+          <span className="mr-1 text-danger">
             *
           </span>
         </label>
@@ -102,28 +93,30 @@ export default function CampaignInformationStep() {
           type="text"
           placeholder="چیزی بنویسید"
           aria-invalid={
-            errors.campaignName
-              ? "true"
-              : "false"
+            !!errors.campaignName
           }
-          {...register("campaignName")}
-          className={[
-            "h-12 w-full rounded-2xl border px-4",
-            "text-right outline-none transition",
-            "focus:ring-2 focus:ring-[#ff7547]/10",
+          {...register(
+            "campaignName",
+          )}
+          className={cn(
+            "h-12 w-full rounded-2xl border px-4 text-right outline-none transition",
+            "focus:ring-2 focus:ring-primary/10",
+            {
+              "border-danger focus:border-danger":
+                !!errors.campaignName,
 
-            errors.campaignName
-              ? "border-red-500 focus:border-red-500"
-              : "border-[#dedede] focus:border-[#ff7547]",
-          ].join(" ")}
+              "border-border-strong focus:border-primary":
+                !errors.campaignName,
+            },
+          )}
         />
 
         {errors.campaignName && (
-          <p
-            role="alert"
-            className="mt-2 text-sm text-red-500"
-          >
-            {errors.campaignName.message}
+          <p className="mt-2 text-sm text-danger">
+            {
+              errors.campaignName
+                .message
+            }
           </p>
         )}
       </div>
@@ -131,7 +124,7 @@ export default function CampaignInformationStep() {
       <div className="mt-8">
         <label
           htmlFor="campaign-description"
-          className="mb-2 block font-medium"
+          className="mb-2 block font-medium text-text"
         >
           توضیحات
         </label>
@@ -140,52 +133,51 @@ export default function CampaignInformationStep() {
           <textarea
             id="campaign-description"
             placeholder="چیزی بنویسید"
-            maxLength={150}
             aria-invalid={
-              errors.description
-                ? "true"
-                : "false"
+              !!errors.description
             }
-            {...register("description")}
-            className={[
-              "min-h-52 w-full resize-none rounded-2xl",
-              "border p-4 pb-10 text-right",
-              "outline-none transition",
-              "focus:ring-2 focus:ring-[#ff7547]/10",
+            {...register(
+              "description",
+            )}
+            className={cn(
+              "min-h-52 w-full resize-none rounded-2xl border p-4 pb-10 text-right outline-none transition",
+              "focus:ring-2 focus:ring-primary/10",
+              {
+                "border-danger focus:border-danger":
+                  !!errors.description,
 
-              errors.description
-                ? "border-red-500 focus:border-red-500"
-                : "border-[#dedede] focus:border-[#ff7547]",
-            ].join(" ")}
+                "border-border-strong focus:border-primary":
+                  !errors.description,
+              },
+            )}
           />
 
-          <span className="absolute bottom-4 left-4 text-xs text-[#aaa]">
+          <span className="absolute bottom-4 left-4 text-xs text-text-disabled">
             {description.length}/150
           </span>
         </div>
 
         {errors.description && (
-          <p
-            role="alert"
-            className="mt-2 text-sm text-red-500"
-          >
+          <p className="mt-2 text-sm text-danger">
             {errors.description.message}
           </p>
         )}
       </div>
 
-      <div className=" mt-auto flex flex-row-reverse  justify-between pt-12">
+      <div className="mt-auto flex flex-row-reverse justify-between pt-12">
         <button
           type="button"
-          onClick={handleSaveLocalDraft}
-          className="text-sm text-[#999] transition hover:text-[#ff7547]"
+          onClick={
+            handleSaveDraft
+          }
+          className="text-sm text-primary transition hover:opacity-75"
         >
           ذخیره پیش‌نویس
         </button>
 
         <button
           type="submit"
-          className="h-12 min-w-48 rounded-2xl bg-[#ff7c4d] px-8 font-bold text-white transition hover:bg-[#f26d3e]"
+          className="h-12 min-w-48 rounded-2xl bg-primary px-8 font-bold text-white transition hover:bg-primary-hover"
         >
           ادامه
         </button>

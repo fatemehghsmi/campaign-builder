@@ -4,12 +4,9 @@ import type {
   CSSProperties,
 } from "react";
 
-import type {
-  LucideIcon,
-} from "lucide-react";
-
 import {
   Check,
+  type LucideIcon,
 } from "lucide-react";
 
 import {
@@ -57,37 +54,12 @@ export default function CampaignStepsSidebar({
           "--sidebar-width": "368px",
         } as CSSProperties
       }
-      className={cn(
-        "hidden shrink-0 border-0",
-        "bg-transparent lg:flex",
-      )}
+      className="hidden shrink-0 border-0 bg-transparent lg:flex"
     >
-      <SidebarContent
-        className={cn(
-          "h-218.25 w-92",
-          "overflow-hidden",
-          "rounded-3xl",
-          "bg-white",
-          "px-5 py-1.5",
-        )}
-      >
-        <SidebarGroup
-          className={cn(
-            "h-full w-full",
-            "p-0",
-          )}
-        >
-          <SidebarGroupContent
-            className="h-full"
-          >
-            <SidebarMenu
-              className={cn(
-                "mx-auto h-full",
-                "w-82.25",
-                "gap-4.5",
-                "py-4",
-              )}
-            >
+      <SidebarContent className="h-218.25 w-92 overflow-hidden rounded-3xl bg-surface px-5 py-1.5">
+        <SidebarGroup className="h-full w-full p-0">
+          <SidebarGroupContent className="h-full">
+            <SidebarMenu className="mx-auto h-full w-82.25 gap-4.5 py-4">
               {steps.map((step) => {
                 const StepIcon =
                   step.icon;
@@ -113,113 +85,75 @@ export default function CampaignStepsSidebar({
                           : undefined
                       }
                       className={cn(
-                        /*
-                         * Figma card:
-                         * width: 329px
-                         * height: 88px
-                         * padding: 16px
-                         * border-radius: 16px
-                         */
-                        "flex h-22",
-                        "min-h-22",
-                        "w-82.25",
-                        "items-center",
-                        "gap-4",
-                        "rounded-2xl",
-                        "border-2",
-                        "bg-white p-4",
-                        "text-right",
-                        "shadow-none",
-                        "whitespace-normal",
+                        "flex h-22 min-h-22 w-82.25 items-center gap-4",
+                        "rounded-2xl border-2 bg-surface p-4",
+                        "text-right shadow-none whitespace-normal",
 
-                        /*
-                         * Remove default shadcn styles.
-                         */
-                        "hover:bg-white",
-                        "active:bg-white",
-                        "data-[active=true]:bg-white",
+                        "hover:bg-surface",
+                        "active:bg-surface",
+                        "data-[active=true]:bg-surface",
                         "data-[active=true]:font-normal",
                         "data-[active=true]:text-inherit",
 
-                        isActive
-                          ? "border-[#F38353]"
-                          : "border-[#EBEBEB]",
+                        {
+                          "border-primary":
+                            !!isActive,
+
+                          "border-border":
+                            !isActive,
+                        },
                       )}
                     >
-                      {/* Right-side icon */}
+                      {/* Icon */}
                       <StepIcon
                         aria-hidden="true"
                         strokeWidth={1.7}
                         className={cn(
                           "size-8 shrink-0",
+                          {
+                            "text-primary":
+                              !!isActive,
 
-                          isActive
-                            ? "text-[#F38353]"
-                            : "text-[#848382]",
+                            "text-text-muted":
+                              !isActive,
+                          },
                         )}
                       />
 
-                      {/* Middle texts */}
-                      <span
-                        className={cn(
-                          "flex min-w-0",
-                          "flex-1 flex-col",
-                          "items-start",
-                          "justify-center",
-                          "gap-1",
-                          "text-right",
-                        )}
-                      >
+                      {/* Texts */}
+                      <span className="flex min-w-0 flex-1 flex-col items-start justify-center gap-1 text-right">
                         <span
                           className={cn(
-                            "block w-full",
-                            "text-right",
-                            "text-base",
-                            "font-medium",
-                            "leading-7",
+                            "block w-full text-right text-base font-medium leading-7",
+                            {
+                              "text-primary":
+                                !!isActive,
 
-                            isActive
-                              ? "text-[#F38353]"
-                              : "text-[#434343]",
+                              "text-text":
+                                !isActive,
+                            },
                           )}
                         >
                           {step.title}
                         </span>
 
-                        <span
-                          className={cn(
-                            "block w-full",
-                            "text-right",
-                            "text-sm",
-                            "font-medium",
-                            "leading-5.25",
-                            "text-[#848382]",
-                          )}
-                        >
+                        <span className="block w-full text-right text-sm font-medium leading-5.25 text-text-muted">
                           {step.description}
                         </span>
                       </span>
 
-                      {/* Left-side status circle */}
+                      {/* Status */}
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "flex size-6",
-                          "shrink-0",
-                          "items-center",
-                          "justify-center",
-                          "rounded-full",
+                          "flex size-6 shrink-0 items-center justify-center rounded-full",
+                          {
+                            "bg-primary text-white":
+                              !!isCompleted,
 
-                          isCompleted
-                            ? [
-                                "bg-[#F38353]",
-                                "text-white",
-                              ]
-                            : [
-                                "border-2",
-                                "border-[#DEDEDE]",
-                                "bg-white",
-                              ],
+                            "border-2 border-border-strong bg-surface":
+                              !isCompleted,
+                          },
                         )}
                       >
                         {isCompleted && (
