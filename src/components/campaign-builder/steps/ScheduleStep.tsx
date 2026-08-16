@@ -467,9 +467,9 @@ export default function ScheduleStep() {
   return (
     <form
       noValidate
-      className="mx-auto flex min-h-[700px] w-full max-w-[800px] flex-col px-6 py-12"
+      className="mx-auto flex min-h-175 w-full max-w-200 flex-col px-6 py-12"
     >
-      <div className="mx-auto w-full max-w-[520px]">
+      <div className="mx-auto w-full max-w-130">
 
         {/* Start date */}
         <Controller

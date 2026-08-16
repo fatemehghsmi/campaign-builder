@@ -157,7 +157,7 @@ function SummaryCard({
   return (
     <article
       className={cn(
-        "flex min-h-[185px] flex-col items-center justify-center rounded-2xl border bg-surface px-5 py-6 text-center transition",
+        "flex min-h-46.25 flex-col items-center justify-center rounded-2xl border bg-surface px-5 py-6 text-center transition",
         selected
           ? "border-2 border-primary"
           : "border-border",
@@ -403,7 +403,7 @@ export default function CampaignSummaryStep() {
   return (
     <div
       dir="rtl"
-      className="mx-auto flex min-h-[760px] w-full max-w-[920px] flex-col px-6 py-10"
+      className="mx-auto flex min-h-190 w-full max-w-230 flex-col px-6 py-10"
     >
       {/* Campaign information */}
       <section>
