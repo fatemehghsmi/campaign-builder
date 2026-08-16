@@ -228,7 +228,7 @@ function DateField({
             onClick={openCalendar}
             aria-invalid={!!error}
             className={cn(
-              "flex h-[52px] w-full items-center justify-between rounded-2xl border bg-surface px-5 text-sm transition hover:border-primary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15",
+              "flex h-13 w-full items-center justify-between rounded-2xl border bg-surface px-5 text-sm transition hover:border-primary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15",
               error
                 ? "border-danger"
                 : "border-border-strong",
