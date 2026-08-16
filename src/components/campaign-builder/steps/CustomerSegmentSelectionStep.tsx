@@ -106,31 +106,52 @@ function CustomerSegmentCard({
 
   return (
     <div className="relative h-32.25 w-58 shrink-0 outline-none ring-0 focus-within:outline-none focus-within:ring-0">
-      <Checkbox
-        id={checkboxId}
-        checked={isSelected}
-        onCheckedChange={() => {
-          onToggle(segment.id);
-        }}
-        aria-label={`انتخاب ${segment.title}`}
-        className="
-          absolute right-6 top-4 z-20
-          size-6 rounded-lg
-          border-2 border-border-muted
-          bg-surface shadow-none
+      <div className="absolute right-4 top-4 z-20 size-6 cursor-pointer">
+  <Checkbox
+    id={checkboxId}
+    checked={isSelected}
+    onCheckedChange={() => {
+      onToggle(segment.id);
+    }}
+    aria-label={`انتخاب ${segment.title}`}
+    className="
+      size-6 rounded-lg
+      border-2 border-border-muted
+      bg-surface
+      p-0
+      shadow-none
 
-          outline-none ring-0
-          focus:outline-none
-          focus:ring-0
-          focus-visible:outline-none
-          focus-visible:ring-0
-          focus-visible:ring-offset-0
+      outline-none ring-0
+      focus:outline-none
+      focus:ring-0
+      focus-visible:outline-none
+      focus-visible:ring-0
+      focus-visible:ring-offset-0
 
-          data-[state=checked]:border-primary
-          data-[state=checked]:bg-primary
-          data-[state=checked]:text-white
-        "
+      data-[state=checked]:border-primary
+      data-[state=checked]:bg-primary
+
+      [&_svg]:hidden
+    "
+  />
+
+  {isSelected && (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 m-auto size-3.5"
+    >
+      <path
+        d="M3 12L8.4 17L21 5"
+        stroke="white"
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
+    </svg>
+  )}
+</div>
 
       {segment.featured && (
         <PremiumBadge />
