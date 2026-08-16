@@ -11,7 +11,6 @@ import {
 } from "react-hook-form";
 
 import {
-  Check,
   ChevronDown,
   Info,
   Link2,
@@ -167,131 +166,149 @@ function SenderLineDropdown({
   hasError,
   onChange,
 }: SenderLineDropdownProps) {
-  const [isOpen, setIsOpen] =
-    useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const selectedLine =
-    senderLines.find(
-      (line) => line.id === value,
-    );
+  const selectedLine = senderLines.find(
+    (line) => line.id === value,
+  );
 
   return (
     <div
-      className="relative w-full"
+      className="relative z-50 w-full"
       onBlur={(event) => {
         const nextTarget =
           event.relatedTarget as Node | null;
 
-        if (
-          !event.currentTarget.contains(
-            nextTarget,
-          )
-        ) {
+        if (!event.currentTarget.contains(nextTarget)) {
           setIsOpen(false);
         }
       }}
     >
-      <button
-        id="sender-line"
-        type="button"
-        dir="ltr"
-        disabled={disabled}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        aria-invalid={hasError}
-        onClick={() =>
-          setIsOpen(
-            (current) => !current,
-          )
-        }
-        className={cn(
-          "grid h-14 w-full grid-cols-[22px_1fr] items-center gap-2 rounded-2xl border-2 bg-surface px-4 text-base font-medium leading-6 shadow-none outline-none transition-colors focus-visible:border-primary focus-visible:ring-0 disabled:cursor-not-allowed disabled:bg-background disabled:opacity-60",
-          {
-            "border-danger":
-              hasError,
-
-            "border-primary":
-              isOpen && !hasError,
-
-            "border-border":
-              !isOpen && !hasError,
-          },
-        )}
-      >
-        <ChevronDown
-          aria-hidden="true"
+      {/* Closed */}
+      {!isOpen && (
+        <button
+          id="sender-line"
+          type="button"
+          disabled={disabled}
+          aria-haspopup="listbox"
+          aria-expanded={false}
+          aria-invalid={hasError}
+          onClick={() => {
+            if (!disabled) {
+              setIsOpen(true);
+            }
+          }}
           className={cn(
-            "size-5.5 text-text-muted transition-transform",
-            isOpen &&
-              "rotate-180",
+            "flex h-14 w-full items-center justify-between",
+            "rounded-2xl border-2 px-6",
+            "text-base font-medium leading-7",
+            "shadow-none outline-none",
+            "focus-visible:ring-0 cursor-pointer",
+
+            hasError
+              ? "border-danger"
+              : "border-border",
+
+            disabled
+              ? "cursor-not-allowed bg-background text-text-disabled"
+              : "bg-surface text-text-muted",
           )}
-        />
-
-        <span
-          dir="ltr"
-          className="block w-full text-right text-text-muted"
         >
-          {selectedLine?.label ??
-            "خط ارسال را انتخاب کنید"}
-        </span>
-      </button>
+          <span className="text-right">
+            {selectedLine?.label || "انتخاب کنید"}
+          </span>
 
+          <ChevronDown
+            aria-hidden="true"
+            strokeWidth={1.5}
+            className={cn(
+              "size-4 shrink-0",
+              disabled
+                ? "text-text-disabled"
+                : "text-text-muted",
+            )}
+          />
+        </button>
+      )}
+
+      {/* Open */}
       {isOpen && !disabled && (
         <div
-          role="listbox"
-          dir="rtl"
-          aria-label="خط ارسال‌کننده پیامک"
-          className="absolute inset-x-0 top-[calc(100%+1px)] z-100 w-full overflow-hidden rounded-2xl border-2 border-border bg-surface shadow-[0_12px_32px_rgba(0,0,0,0.08)]"
+          className="
+            absolute inset-x-0 top-0
+            z-100
+            overflow-hidden
+            rounded-2xl
+            border-2 border-border
+            bg-surface
+          "
         >
-          {senderLines.map(
-            (line, index) => {
-              const isSelected =
-                value === line.id;
+          {/* Open trigger */}
+          <button
+            id="sender-line"
+            type="button"
+            aria-haspopup="listbox"
+            aria-expanded="true"
+            onClick={() => {
+              setIsOpen(false);
+            }}
+            className="
+              flex h-14 w-full
+              items-center justify-between
+              border-b border-border
+              bg-surface
+              px-6
+              text-base font-medium leading-7
+              text-text-muted
+              outline-none
+            "
+          >
+            <span className="text-right">
+              {selectedLine?.label || "انتخاب کنید"}
+            </span>
 
-              return (
-                <button
-                  key={line.id}
-                  type="button"
-                  role="option"
-                  dir="ltr"
-                  aria-selected={
-                    isSelected
-                  }
-                  onClick={() => {
-                    onChange(line.id);
-                    setIsOpen(false);
-                  }}
-                  className={cn(
-                    "grid h-12 w-full grid-cols-[22px_1fr] items-center gap-2 px-4 text-base font-medium outline-none transition-colors hover:bg-primary-soft hover:text-primary focus:bg-primary-soft focus:text-primary",
-                    isSelected
-                      ? "bg-primary-soft text-primary"
-                      : "bg-surface text-text",
+            <ChevronDown
+              aria-hidden="true"
+              strokeWidth={1.5}
+              className="size-4 shrink-0 rotate-180 text-text-muted"
+            />
+          </button>
 
-                    index <
-                      senderLines.length -
-                        1 &&
-                      "border-b border-border",
-                  )}
-                >
-                  <span className="flex size-5.5 items-center justify-center">
-                    {isSelected && (
-                      <Check
-                        aria-hidden="true"
-                        className="size-4.5"
-                      />
-                    )}
-                  </span>
-
-                  <span
-                    dir="ltr"
-                    className="block w-full text-right"
-                  >
-                    {line.label}
-                  </span>
-                </button>
-              );
-            },
-          )}
+          {/* Options */}
+          <div
+            role="listbox"
+            dir="rtl"
+            aria-label="خط ارسال‌کننده پیامک"
+            className="bg-surface py-1"
+          >
+            {senderLines.map((line) => (
+              <button
+                key={line.id}
+                type="button"
+                role="option"
+                aria-selected={value === line.id}
+                onClick={() => {
+                  onChange(line.id);
+                  setIsOpen(false);
+                }}
+                className="
+                  flex h-10 w-full
+                  items-center
+                  bg-surface
+                  px-6
+                  text-right
+                  text-base font-medium leading-7
+                  text-text
+                  outline-none
+                  hover:bg-surface
+                  focus:bg-surface
+                  cursor-pointer
+                "
+              >
+                {line.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
