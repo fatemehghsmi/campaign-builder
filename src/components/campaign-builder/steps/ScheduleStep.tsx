@@ -228,9 +228,14 @@ function DateField({
             onClick={openCalendar}
             aria-invalid={!!error}
             className={cn(
-              "flex h-13 w-full items-center justify-between rounded-2xl border bg-surface px-5 text-sm transition hover:border-primary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15",
+              "flex h-13 w-full items-center justify-between rounded-2xl border-2 bg-surface px-5 text-sm transition",
+              "hover:border-primary",
+              "focus:border-primary",
+              "focus:outline-none",
+              "focus:ring-0",
+
               error
-                ? "border-danger"
+                ? "border-danger focus:border-danger"
                 : "border-border-strong",
             )}
           >
@@ -265,8 +270,11 @@ function DateField({
 
 
 interface TimeSegmentProps {
+  id: string;
   value: string;
   placeholder: string;
+
+  nextInputId?: string;
 
   disabled?: boolean;
   hasError?: boolean;
@@ -280,8 +288,10 @@ interface TimeSegmentProps {
 
 
 function TimeSegment({
+  id,
   value,
   placeholder,
+  nextInputId,
   disabled = false,
   hasError = false,
   onChange,
@@ -289,6 +299,7 @@ function TimeSegment({
 }: TimeSegmentProps) {
   return (
     <Input
+      id={id}
       type="text"
       dir="ltr"
       inputMode="numeric"
@@ -299,11 +310,25 @@ function TimeSegment({
       placeholder={placeholder}
       aria-invalid={hasError}
       onChange={(event) => {
-        onChange(
+        const nextValue =
           normalizeTimeInput(
             event.target.value,
-          ),
-        );
+          );
+
+        onChange(nextValue);
+
+        if (
+          nextValue.length === 2 &&
+          nextInputId
+        ) {
+          requestAnimationFrame(() => {
+            document
+              .getElementById(
+                nextInputId,
+              )
+              ?.focus();
+          });
+        }
       }}
       onBlur={() => {
         if (value) {
@@ -318,12 +343,28 @@ function TimeSegment({
         onBlur();
       }}
       className={cn(
-        "h-12 rounded-2xl text-center shadow-none placeholder:text-text-disabled focus-visible:border-primary focus-visible:ring-primary/15",
+        "h-12 rounded-2xl text-center shadow-none",
+
+        "outline-none ring-0 ring-offset-0",
+
+        "focus:outline-none",
+        "focus:ring-0",
+        "focus:ring-offset-0",
+
+        "focus-visible:outline-none",
+        "focus-visible:ring-0",
+        "focus-visible:ring-offset-0",
+
+        "aria-invalid:outline-none",
+        "aria-invalid:ring-0",
+        "aria-invalid:ring-offset-0",
+
         hasError
-          ? "border-danger"
-          : "border-border-strong",
+          ? "border-danger focus:border-danger focus-visible:border-danger"
+          : "border-border focus:border-primary focus-visible:border-primary",
+
         disabled &&
-          "bg-background text-text-disabled",
+          "border-border bg-background text-text-disabled",
       )}
     />
   );
@@ -376,6 +417,7 @@ export default function ScheduleStep() {
 
   const isEndTimeDisabled =
     !endDate;
+
 
   const startTimeError =
     errors.startHour?.message ||
@@ -510,11 +552,14 @@ export default function ScheduleStep() {
             dir="ltr"
             className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-3"
           >
+            {/* Hour */}
             <Controller
               control={control}
               name="startHour"
               render={({ field }) => (
                 <TimeSegment
+                  id="start-hour"
+                  nextInputId="start-minute"
                   value={field.value}
                   placeholder="ساعت"
                   hasError={
@@ -534,11 +579,14 @@ export default function ScheduleStep() {
               :
             </span>
 
+            {/* Minute */}
             <Controller
               control={control}
               name="startMinute"
               render={({ field }) => (
                 <TimeSegment
+                  id="start-minute"
+                  nextInputId="start-second"
                   value={field.value}
                   placeholder="دقیقه"
                   hasError={
@@ -558,11 +606,13 @@ export default function ScheduleStep() {
               :
             </span>
 
+            {/* Second */}
             <Controller
               control={control}
               name="startSecond"
               render={({ field }) => (
                 <TimeSegment
+                  id="start-second"
                   value={field.value}
                   placeholder="ثانیه"
                   hasError={
@@ -633,11 +683,14 @@ export default function ScheduleStep() {
             dir="ltr"
             className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-3"
           >
+            {/* Hour */}
             <Controller
               control={control}
               name="endHour"
               render={({ field }) => (
                 <TimeSegment
+                  id="end-hour"
+                  nextInputId="end-minute"
                   value={field.value}
                   placeholder="ساعت"
                   disabled={
@@ -667,11 +720,14 @@ export default function ScheduleStep() {
               :
             </span>
 
+            {/* Minute */}
             <Controller
               control={control}
               name="endMinute"
               render={({ field }) => (
                 <TimeSegment
+                  id="end-minute"
+                  nextInputId="end-second"
                   value={field.value}
                   placeholder="دقیقه"
                   disabled={
@@ -701,11 +757,13 @@ export default function ScheduleStep() {
               :
             </span>
 
+            {/* Second */}
             <Controller
               control={control}
               name="endSecond"
               render={({ field }) => (
                 <TimeSegment
+                  id="end-second"
                   value={field.value}
                   placeholder="ثانیه"
                   disabled={
