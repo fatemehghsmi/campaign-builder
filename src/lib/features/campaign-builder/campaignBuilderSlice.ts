@@ -11,6 +11,7 @@ import type { EntryMessageFormValues } from "./entryMessageSchema";
 import type { ResultMessageFormValues } from "./resultMessageSchema";
 import type { ScheduleFormValues } from "./scheduleSchema";
 
+
 export type CampaignStep =
   | 1
   | 2
@@ -20,6 +21,7 @@ export type CampaignStep =
   | 6
   | 7;
 
+
 export interface CampaignBuilderState {
   currentStep: CampaignStep;
 
@@ -27,15 +29,13 @@ export interface CampaignBuilderState {
   description: string;
 
   selectedJourneyId: string | null;
-
   selectedSegmentIds: string[];
 
   entryMessage: EntryMessageFormValues;
-
   resultMessage: ResultMessageFormValues;
-
   schedule: ScheduleFormValues;
 }
+
 
 const initialState: CampaignBuilderState = {
   currentStep: 1,
@@ -44,61 +44,62 @@ const initialState: CampaignBuilderState = {
   description: "",
 
   selectedJourneyId: null,
-
   selectedSegmentIds: [],
 
-entryMessage: {
-  isEnabled: true,
+  entryMessage: {
+    isEnabled: true,
 
-  senderLineId: "1000000000",
+    senderLineId: "1000000000",
 
-  message:
-    "سلام سعید احمدی عزیز\n" +
-    "به باشگاه مشتریان عطر مجلسی خوش آمدید.\n" +
-    "سطح کاربری شما طلایی است.\n" +
-    "امتیاز فعلی شما ۱٬۲۰۰ است.\n" +
-    "اعتبار فعلی شما ۵۰۰٬۰۰۰ تومان است.\n" +
-    "برای مشاهده جزئیات روی لینک زیر بزنید:\n" +
-    "https://www.atrmajlesi.ir\n" +
-    "لغو 11",
+    message:
+      "سلام سعید احمدی عزیز\n" +
+      "به باشگاه مشتریان عطر مجلسی خوش آمدید.\n" +
+      "سطح کاربری شما طلایی است.\n" +
+      "امتیاز فعلی شما ۱٬۲۰۰ است.\n" +
+      "اعتبار فعلی شما ۵۰۰٬۰۰۰ تومان است.\n" +
+      "برای مشاهده جزئیات روی لینک زیر بزنید:\n" +
+      "https://www.atrmajlesi.ir\n" +
+      "لغو 11",
 
-  linkUrl:
-    "https://www.atrmajlesi.ir",
+    linkUrl:
+      "https://www.atrmajlesi.ir",
 
-  uniqueLinkPerCustomer: false,
-},
-resultMessage: {
-  isEnabled: true,
+    uniqueLinkPerCustomer: false,
+  },
 
-  channel: "bale",
+  resultMessage: {
+    isEnabled: true,
 
-  imageUrl: "",
+    channel: "bale",
 
-  message:
-    "سلام سعید احمدی عزیز\n" +
-    "ورود شما را به باشگاه مشتریان عطر مجلسی تبریک می‌گوییم.\n" +
-    "امتیاز شما در باشگاه ما: ۱٬۲۰۰\n" +
-    "https://www.atrmajlesi.ir\n" +
-    "لغو 11",
+    imageUrl: "",
 
-  linkUrl:
-    "https://www.atrmajlesi.ir",
+    message:
+      "سلام سعید احمدی عزیز\n" +
+      "ورود شما را به باشگاه مشتریان عطر مجلسی تبریک می‌گوییم.\n" +
+      "امتیاز شما در باشگاه ما: ۱٬۲۰۰\n" +
+      "https://www.atrmajlesi.ir\n" +
+      "لغو 11",
 
-  uniqueLinkPerCustomer: false,
-},
-schedule: {
-  startDate: "",
-  startHour: "",
-  startMinute: "",
-  startSecond: "",
+    linkUrl:
+      "https://www.atrmajlesi.ir",
 
-  endDate: "",
-  endHour: "",
-  endMinute: "",
-  endSecond: "",
-},
+    uniqueLinkPerCustomer: false,
+  },
 
+  schedule: {
+    startDate: "",
+    startHour: "",
+    startMinute: "",
+    startSecond: "",
+
+    endDate: "",
+    endHour: "",
+    endMinute: "",
+    endSecond: "",
+  },
 };
+
 
 const campaignBuilderSlice = createSlice({
   name: "campaignBuilder",
@@ -117,6 +118,7 @@ const campaignBuilderSlice = createSlice({
         action.payload.description;
     },
 
+
     journeySelected(
       state,
       action: PayloadAction<string>,
@@ -125,59 +127,43 @@ const campaignBuilderSlice = createSlice({
         action.payload;
     },
 
-    customerSegmentToggled(
+
+    customerSegmentsSaved(
       state,
-      action: PayloadAction<string>,
+      action: PayloadAction<string[]>,
     ) {
-      const segmentId = action.payload;
-
-      const existingIndex =
-        state.selectedSegmentIds.indexOf(
-          segmentId,
-        );
-
-      if (existingIndex !== -1) {
-        state.selectedSegmentIds.splice(
-          existingIndex,
-          1,
-        );
-
-        return;
-      }
-
-      state.selectedSegmentIds.push(
-        segmentId,
-      );
+      state.selectedSegmentIds =
+        action.payload;
     },
 
-    customerSegmentsCleared(state) {
-      state.selectedSegmentIds = [];
+
+    entryMessageSaved(
+      state,
+      action: PayloadAction<EntryMessageFormValues>,
+    ) {
+      state.entryMessage =
+        action.payload;
     },
 
-entryMessageSaved(
-  state,
-  action: PayloadAction<EntryMessageFormValues>,
-) {
-  state.entryMessage = {
-    ...action.payload,
-  };
-},
-resultMessageSaved(
-  state,
-  action: PayloadAction<ResultMessageFormValues>,
-) {
-  state.resultMessage = {
-    ...action.payload,
-  };
-},
-scheduleSaved(
-  state,
-  action: PayloadAction<ScheduleFormValues>,
-) {
-  state.schedule = {
-    ...action.payload,
-  };
-},
+
+    resultMessageSaved(
+      state,
+      action: PayloadAction<ResultMessageFormValues>,
+    ) {
+      state.resultMessage =
+        action.payload;
+    },
+
+
+    scheduleSaved(
+      state,
+      action: PayloadAction<ScheduleFormValues>,
+    ) {
+      state.schedule =
+        action.payload;
+    },
+
+
     nextStep(state) {
       if (state.currentStep < 7) {
         state.currentStep = (
@@ -185,6 +171,7 @@ scheduleSaved(
         ) as CampaignStep;
       }
     },
+
 
     previousStep(state) {
       if (state.currentStep > 1) {
@@ -194,17 +181,18 @@ scheduleSaved(
       }
     },
 
+
     builderReset() {
       return initialState;
     },
   },
 });
 
+
 export const {
   campaignInformationSaved,
   journeySelected,
-  customerSegmentToggled,
-  customerSegmentsCleared,
+  customerSegmentsSaved,
   entryMessageSaved,
   resultMessageSaved,
   scheduleSaved,
@@ -213,35 +201,47 @@ export const {
   builderReset,
 } = campaignBuilderSlice.actions;
 
+
 export const selectCampaignBuilder = (
   state: RootState,
 ) => state.campaignBuilder;
 
+
 export const selectCurrentStep = (
   state: RootState,
-) => state.campaignBuilder.currentStep;
+) =>
+  state.campaignBuilder.currentStep;
+
 
 export const selectSelectedJourneyId = (
   state: RootState,
 ) =>
   state.campaignBuilder.selectedJourneyId;
 
+
 export const selectSelectedSegmentIds = (
   state: RootState,
 ) =>
   state.campaignBuilder.selectedSegmentIds;
 
+
 export const selectEntryMessage = (
   state: RootState,
-) => state.campaignBuilder.entryMessage;
+) =>
+  state.campaignBuilder.entryMessage;
+
 
 export const selectResultMessage = (
   state: RootState,
-) => state.campaignBuilder.resultMessage;
+) =>
+  state.campaignBuilder.resultMessage;
+
 
 export const selectSchedule = (
   state: RootState,
-) => state.campaignBuilder.schedule;
+) =>
+  state.campaignBuilder.schedule;
+
 
 export const selectCampaignInformation =
   createSelector(
@@ -254,5 +254,6 @@ export const selectCampaignInformation =
         campaignBuilder.description,
     }),
   );
+
 
 export default campaignBuilderSlice.reducer;

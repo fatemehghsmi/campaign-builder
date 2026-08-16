@@ -20,18 +20,13 @@ import {
 
 import { cn } from "@/lib/utils";
 
-/* -------------------------------------------------------------------------- */
-/*                                Mock data                                   */
-/* -------------------------------------------------------------------------- */
 
-/*
- * Replace this pricing information with API data later.
- */
 const SMS_COST_PER_PERSON = 1_285;
 const BALE_COST_PER_PERSON = 1_100;
 
 const WALLET_BALANCE = 211_925_000;
 const PAYABLE_AMOUNT = 13_117_500;
+
 
 interface JourneySummary {
   id: string;
@@ -46,6 +41,7 @@ interface SegmentSummary {
   count: number;
   icon: string;
 }
+
 
 const defaultJourney: JourneySummary = {
   id: "repeat-purchase-reminder",
@@ -75,6 +71,7 @@ const defaultSegments: SegmentSummary[] = [
   },
 ];
 
+
 const journeyData: Record<
   string,
   JourneySummary
@@ -82,7 +79,8 @@ const journeyData: Record<
   "repeat-purchase-reminder":
     defaultJourney,
 
-  "journey-1": defaultJourney,
+  "journey-1":
+    defaultJourney,
 
   "journey-2": {
     id: "journey-2",
@@ -98,6 +96,7 @@ const journeyData: Record<
     icon: "🔁",
   },
 };
+
 
 const segmentData: Record<
   string,
@@ -122,9 +121,6 @@ const segmentData: Record<
     defaultSegments[2],
 };
 
-/* -------------------------------------------------------------------------- */
-/*                               Format helpers                               */
-/* -------------------------------------------------------------------------- */
 
 function formatNumber(
   value: number,
@@ -134,15 +130,13 @@ function formatNumber(
   ).format(value);
 }
 
+
 function formatRial(
   value: number,
 ): string {
   return `${formatNumber(value)} ریال`;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                              Summary card                                  */
-/* -------------------------------------------------------------------------- */
 
 interface SummaryCardProps {
   type: "journey" | "segment";
@@ -151,6 +145,7 @@ interface SummaryCardProps {
   icon: string;
   selected?: boolean;
 }
+
 
 function SummaryCard({
   type,
@@ -162,18 +157,13 @@ function SummaryCard({
   return (
     <article
       className={cn(
-        "flex min-h-[185px]",
-        "flex-col items-center",
-        "justify-center rounded-2xl",
-        "border bg-white px-5 py-6",
-        "text-center transition",
-
+        "flex min-h-[185px] flex-col items-center justify-center rounded-2xl border bg-surface px-5 py-6 text-center transition",
         selected
-          ? "border-2 border-[#ff7c4d]"
-          : "border-[#e3e3e3]",
+          ? "border-2 border-primary"
+          : "border-border",
       )}
     >
-      <p className="text-sm text-[#888]">
+      <p className="text-sm text-text-muted">
         {type === "journey"
           ? "سفر مشتری"
           : "سگمنت"}
@@ -183,26 +173,24 @@ function SummaryCard({
         {icon}
       </div>
 
-      <h3 className="mt-4 font-bold text-[#444]">
+      <h3 className="mt-4 font-bold text-text">
         {title}
       </h3>
 
-      <p className="mt-3 text-sm text-[#888]">
+      <p className="mt-3 text-sm text-text-muted">
         {subtitle}
       </p>
     </article>
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                              Invoice details                               */
-/* -------------------------------------------------------------------------- */
 
 interface InvoiceRowProps {
   label: string;
   value: string;
   emphasized?: boolean;
 }
+
 
 function InvoiceRow({
   label,
@@ -211,17 +199,16 @@ function InvoiceRow({
 }: InvoiceRowProps) {
   return (
     <div className="flex items-center justify-between gap-6">
-      <span className="text-sm text-[#777]">
+      <span className="text-sm text-text-muted">
         {label}
       </span>
 
       <span
         className={cn(
           "shrink-0 text-sm",
-
           emphasized
-            ? "font-bold text-[#333]"
-            : "text-[#555]",
+            ? "font-bold text-text"
+            : "text-text-muted",
         )}
       >
         {value}
@@ -230,18 +217,20 @@ function InvoiceRow({
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*                               Main component                               */
-/* -------------------------------------------------------------------------- */
 
 export default function CampaignSummaryStep() {
   const dispatch = useAppDispatch();
 
-  const [isInvoiceOpen, setIsInvoiceOpen] =
-    useState(true);
+  const [
+    isInvoiceOpen,
+    setIsInvoiceOpen,
+  ] = useState(true);
 
-  const [paymentMessage, setPaymentMessage] =
-    useState("");
+  const [
+    paymentMessage,
+    setPaymentMessage,
+  ] = useState("");
+
 
   const campaignName =
     useAppSelector(
@@ -286,15 +275,13 @@ export default function CampaignSummaryStep() {
           .resultMessage,
     );
 
+
   const selectedJourney =
     journeyData[
       selectedJourneyId ?? ""
     ] ?? defaultJourney;
 
-  /*
-   * Unknown IDs receive the default visual data.
-   * Replace segmentData with backend data later.
-   */
+
   const selectedSegments =
     selectedSegmentIds.length > 0
       ? selectedSegmentIds
@@ -303,20 +290,20 @@ export default function CampaignSummaryStep() {
             (
               segmentId,
               index,
-            ) => {
-              return (
-                segmentData[segmentId] ?? {
-                  ...defaultSegments[
-                    index %
-                      defaultSegments.length
-                  ],
+            ) =>
+              segmentData[
+                segmentId
+              ] ?? {
+                ...defaultSegments[
+                  index %
+                    defaultSegments.length
+                ],
 
-                  id: segmentId,
-                }
-              );
-            },
+                id: segmentId,
+              },
           )
       : defaultSegments;
+
 
   const recipientCount =
     selectedSegments.reduce(
@@ -325,15 +312,12 @@ export default function CampaignSummaryStep() {
       0,
     );
 
+
   const smsPerRecipient =
     entryMessage?.isEnabled
       ? 1
       : 0;
 
-  /*
-   * The Figma example shows two Bale messages
-   * for each customer.
-   */
   const balePerRecipient =
     resultMessage?.isEnabled
       ? 2
@@ -351,18 +335,48 @@ export default function CampaignSummaryStep() {
     WALLET_BALANCE -
     PAYABLE_AMOUNT;
 
+
   function handleSaveDraft() {
     /*
-     * Previous steps have already saved their data
-     * in Redux.
+     * There is no editable data on this page.
+     * All campaign data was already saved to Redux
+     * in the previous steps.
+     *
+     * Later this button can call the API to persist
+     * the whole Redux campaign as a backend draft.
      */
     window.alert(
       "پیش‌نویس کمپین ذخیره شد.",
     );
   }
 
+
+  function handlePrevious() {
+    dispatch(previousStep());
+  }
+
+
   function handlePayment() {
     setPaymentMessage("");
+
+    if (!selectedJourneyId) {
+      setPaymentMessage(
+        "لطفاً سفر مشتری را انتخاب کنید.",
+      );
+
+      return;
+    }
+
+    if (
+      selectedSegmentIds.length ===
+      0
+    ) {
+      setPaymentMessage(
+        "لطفاً حداقل یک سگمنت انتخاب کنید.",
+      );
+
+      return;
+    }
 
     if (
       WALLET_BALANCE <
@@ -376,62 +390,61 @@ export default function CampaignSummaryStep() {
     }
 
     /*
-     * Replace this with the payment API request.
+     * Later:
+     * send the confirmed campaign data
+     * to the backend/payment API here.
      */
     window.alert(
       "اطلاعات کمپین آماده ارسال به درگاه پرداخت است.",
     );
   }
 
+
   return (
     <div
       dir="rtl"
-      className={cn(
-        "mx-auto flex min-h-[760px]",
-        "w-full max-w-[920px]",
-        "flex-col px-6 py-10",
-      )}
+      className="mx-auto flex min-h-[760px] w-full max-w-[920px] flex-col px-6 py-10"
     >
       {/* Campaign information */}
       <section>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-[#888]">
+          <span className="text-sm text-text-muted">
             نام کمپین:
           </span>
 
-          <h2 className="font-bold text-[#333]">
+          <h2 className="font-bold text-text">
             {campaignName}
           </h2>
         </div>
 
         <div className="mt-5 flex items-start gap-2">
-          <span className="shrink-0 text-sm text-[#888]">
+          <span className="shrink-0 text-sm text-text-muted">
             توضیحات:
           </span>
 
-          <p className="text-sm leading-7 text-[#555]">
+          <p className="text-sm leading-7 text-text-muted">
             {campaignDescription}
           </p>
         </div>
       </section>
 
-      <div className="my-7 h-px bg-[#e8e8e8]" />
+
+      <div className="my-7 h-px bg-border" />
+
 
       {/* Journey and segments */}
-      <section
-        className={cn(
-          "grid gap-5",
-          "sm:grid-cols-2",
-          "xl:grid-cols-4",
-        )}
-      >
+      <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
           type="journey"
-          title={selectedJourney.title}
+          title={
+            selectedJourney.title
+          }
           subtitle={
             selectedJourney.subtitle
           }
-          icon={selectedJourney.icon}
+          icon={
+            selectedJourney.icon
+          }
           selected
         />
 
@@ -450,53 +463,38 @@ export default function CampaignSummaryStep() {
         )}
       </section>
 
+
       {/* Billing */}
       <section className="mt-8">
         <button
           type="button"
           onClick={() => {
             setIsInvoiceOpen(
-              (previousValue) =>
-                !previousValue,
+              (current) =>
+                !current,
             );
           }}
-          className={cn(
-            "flex w-full items-center",
-            "justify-between",
-            "border-b border-[#ededed]",
-            "pb-4 text-right",
-          )}
+          className="flex w-full items-center justify-between border-b border-border pb-4 text-right"
         >
-          <span className="font-bold text-[#333]">
+          <span className="font-bold text-text">
             صورتحساب
           </span>
 
           <ChevronDown
             className={cn(
-              "size-5 text-[#555]",
-              "transition-transform",
-
+              "size-5 text-text-muted transition-transform",
               isInvoiceOpen &&
                 "rotate-180",
             )}
           />
         </button>
 
+
         {isInvoiceOpen && (
-          <div
-            className={cn(
-              "mt-5 grid gap-5",
-              "lg:grid-cols-[1fr_340px]",
-            )}
-          >
+          <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_340px]">
+
             {/* Invoice table */}
-            <div
-              className={cn(
-                "space-y-5 rounded-2xl",
-                "border border-[#dedede]",
-                "bg-white p-7",
-              )}
-            >
+            <div className="space-y-5 rounded-2xl border border-border-strong bg-surface p-7">
               <InvoiceRow
                 label="تعداد مخاطبان"
                 value={`${formatNumber(
@@ -540,14 +538,9 @@ export default function CampaignSummaryStep() {
               />
             </div>
 
+
             {/* Wallet card */}
-            <aside
-              className={cn(
-                "h-fit rounded-2xl",
-                "border border-[#dedede]",
-                "bg-[#fafafa] p-6",
-              )}
-            >
+            <aside className="h-fit rounded-2xl border border-border-strong bg-background p-6">
               <InvoiceRow
                 label="موجودی کیف پول:"
                 value={formatRial(
@@ -572,21 +565,14 @@ export default function CampaignSummaryStep() {
                     "در این قسمت باید صفحه افزایش موجودی باز شود.",
                   );
                 }}
-                className={cn(
-                  "mt-6 h-12 w-full",
-                  "rounded-2xl",
-                  "bg-[#ff7445]",
-                  "font-bold text-white",
-
-                  "hover:bg-[#ef6739]",
-                )}
+                className="mt-6 h-12 w-full rounded-2xl bg-primary font-bold text-white hover:bg-primary-hover"
               >
                 <Plus className="size-5" />
 
                 افزایش موجودی
               </Button>
 
-              <p className="mt-4 text-center text-xs text-[#999]">
+              <p className="mt-4 text-center text-xs text-text-subtle">
                 موجودی پس از پرداخت:{" "}
                 {formatRial(
                   remainingWalletBalance,
@@ -597,39 +583,29 @@ export default function CampaignSummaryStep() {
         )}
       </section>
 
+
       {paymentMessage && (
         <div
           role="alert"
-          className={cn(
-            "mt-6 rounded-2xl",
-            "border border-red-200",
-            "bg-red-50 px-4 py-3",
-            "text-sm text-red-600",
-          )}
+          className="mt-6 rounded-2xl border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger"
         >
           {paymentMessage}
         </div>
       )}
 
+
       {/* Bottom actions */}
       <div
         dir="ltr"
-        className={cn(
-          "mt-auto flex flex-wrap",
-          "items-center justify-between",
-          "gap-4 pt-14",
-        )}
+        className="mt-auto flex flex-wrap items-center justify-between gap-4 pt-14"
       >
         <Button
           type="button"
           variant="ghost"
-          onClick={handleSaveDraft}
-          className={cn(
-            "text-[#ff7445]",
-
-            "hover:bg-[#fff4ef]",
-            "hover:text-[#ff7445]",
-          )}
+          onClick={
+            handleSaveDraft
+          }
+          className="text-primary hover:bg-primary-soft hover:text-primary"
         >
           ذخیره پیش‌نویس
         </Button>
@@ -638,30 +614,20 @@ export default function CampaignSummaryStep() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => {
-              dispatch(previousStep());
-            }}
-            className={cn(
-              "h-12 min-w-44",
-              "rounded-2xl",
-              "border-[#dedede]",
-              "bg-white text-[#555]",
-            )}
+            onClick={
+              handlePrevious
+            }
+            className="h-12 min-w-44 rounded-2xl border-border-strong bg-surface text-text shadow-none"
           >
             قبلی
           </Button>
 
           <Button
             type="button"
-            onClick={handlePayment}
-            className={cn(
-              "h-12 min-w-44",
-              "rounded-2xl",
-              "bg-[#ff7445]",
-              "font-bold text-white",
-
-              "hover:bg-[#ef6739]",
-            )}
+            onClick={
+              handlePayment
+            }
+            className="h-12 min-w-44 rounded-2xl bg-primary font-bold text-white shadow-none hover:bg-primary-hover"
           >
             پرداخت
           </Button>

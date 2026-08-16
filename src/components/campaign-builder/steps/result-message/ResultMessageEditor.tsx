@@ -3,9 +3,7 @@
 import { useRef } from "react";
 import {
   Controller,
-  type Control,
-  type FieldErrors,
-  type UseFormClearErrors,
+  useFormContext,
 } from "react-hook-form";
 
 import {
@@ -36,9 +34,6 @@ export interface ResultMessageVariable {
 }
 
 interface ResultMessageEditorProps {
-  control: Control<ResultMessageFormValues>;
-  errors: FieldErrors<ResultMessageFormValues>;
-  clearErrors: UseFormClearErrors<ResultMessageFormValues>;
   isEnabled: boolean;
   message: string;
   imageUrl: string;
@@ -84,7 +79,9 @@ function MessageToggle({
         aria-hidden="true"
         className={cn(
           "absolute left-1 top-1 size-4 rounded-sm bg-surface transition-transform duration-200",
-          checked ? "translate-x-4.5" : "translate-x-0",
+          checked
+            ? "translate-x-4.5"
+            : "translate-x-0",
         )}
       />
     </button>
@@ -122,9 +119,6 @@ function MessageInfoTooltip() {
 }
 
 export default function ResultMessageEditor({
-  control,
-  errors,
-  clearErrors,
   isEnabled,
   message,
   imageUrl,
@@ -136,13 +130,21 @@ export default function ResultMessageEditor({
   onImageButtonClick,
   onDeleteImage,
 }: ResultMessageEditorProps) {
+  const {
+    control,
+    clearErrors,
+    formState: { errors },
+  } = useFormContext<ResultMessageFormValues>();
+
   const textareaRef =
     useRef<HTMLTextAreaElement | null>(null);
 
   function handleInsertValue(value: string) {
     const textarea = textareaRef.current;
 
-    if (!textarea) return;
+    if (!textarea) {
+      return;
+    }
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
@@ -160,6 +162,7 @@ export default function ResultMessageEditor({
 
     requestAnimationFrame(() => {
       textarea.focus();
+
       textarea.setSelectionRange(
         nextPosition,
         nextPosition,
@@ -276,7 +279,6 @@ export default function ResultMessageEditor({
           ) : (
             <span className="flex flex-col items-center gap-3 text-text-subtle">
               <ImagePlus className="size-9" />
-
               <span className="text-xs">
                 افزودن تصویر
               </span>

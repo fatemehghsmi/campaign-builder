@@ -9,20 +9,16 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/components/ui/radio-group";
-
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import {
@@ -72,17 +68,10 @@ function JourneyCard({
       >
         <Card
           className={cn(
-            "relative h-33 gap-0 overflow-hidden",
-            "rounded-2xl border py-0 shadow-none",
-            "ring-0 transition-all duration-200",
-
-            {
-              "border-primary bg-primary-soft shadow-[0_0_0_2px_rgba(243,131,83,0.08)]":
-                isSelected,
-
-              "border-border bg-surface hover:border-primary/60 hover:shadow-sm":
-                !isSelected,
-            },
+            "relative h-33 gap-0 overflow-hidden rounded-2xl border py-0 shadow-none ring-0 transition-all duration-200",
+            isSelected
+              ? "border-primary bg-primary-soft shadow-[0_0_0_2px_rgba(243,131,83,0.08)]"
+              : "border-border bg-surface hover:border-primary/60 hover:shadow-sm",
           )}
         >
           <ExternalLink
@@ -117,15 +106,23 @@ export default function JourneySelectionStep() {
   const dispatch =
     useAppDispatch();
 
-  const selectedJourneyId =
+  const savedSelectedJourneyId =
     useAppSelector(
       selectSelectedJourneyId,
     );
 
   const [
+    selectedJourneyId,
+    setSelectedJourneyId,
+  ] = useState(
+    savedSelectedJourneyId ?? "",
+  );
+
+  const [
     searchText,
     setSearchText,
   ] = useState("");
+
 
   const normalizedSearch =
     searchText
@@ -145,12 +142,36 @@ export default function JourneySelectionStep() {
       : customerJourneys;
 
 
+  function handleSaveDraft() {
+    if (!selectedJourneyId) {
+      return;
+    }
+
+    dispatch(
+      journeySelected(
+        selectedJourneyId,
+      ),
+    );
+  }
+
+
   function handleContinue() {
     if (!selectedJourneyId) {
       return;
     }
 
+    dispatch(
+      journeySelected(
+        selectedJourneyId,
+      ),
+    );
+
     dispatch(nextStep());
+  }
+
+
+  function handlePrevious() {
+    dispatch(previousStep());
   }
 
 
@@ -209,14 +230,13 @@ export default function JourneySelectionStep() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <RadioGroup
               value={
-                selectedJourneyId ??
-                ""
+                selectedJourneyId
               }
-              onValueChange={(journeyId) => {
-                dispatch(
-                  journeySelected(
-                    journeyId,
-                  ),
+              onValueChange={(
+                journeyId,
+              ) => {
+                setSelectedJourneyId(
+                  journeyId,
                 );
               }}
               className="contents"
@@ -283,7 +303,13 @@ export default function JourneySelectionStep() {
         <Button
           type="button"
           variant="ghost"
-          className="text-primary hover:bg-primary-soft hover:text-primary"
+          disabled={
+            !selectedJourneyId
+          }
+          onClick={
+            handleSaveDraft
+          }
+          className="text-primary hover:bg-primary-soft hover:text-primary disabled:opacity-40"
         >
           ذخیره پیش‌نویس
         </Button>
@@ -292,11 +318,9 @@ export default function JourneySelectionStep() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => {
-              dispatch(
-                previousStep(),
-              );
-            }}
+            onClick={
+              handlePrevious
+            }
             className="h-12 min-w-48 rounded-2xl border-border-strong bg-surface text-text"
           >
             قبلی

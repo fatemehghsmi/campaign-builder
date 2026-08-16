@@ -1,15 +1,23 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { useForm, useWatch, type SubmitHandler } from "react-hook-form";
+import {
+  FormProvider,
+  useForm,
+  useWatch,
+} from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import AddLinkDialog, { type AddedLink } from "../../AddLinkDialog";
+import AddLinkDialog, {
+  type AddedLink,
+} from "../../AddLinkDialog";
 
 import EntryMessageFooter from "./EntryMessageFooter";
-import MessageEditor, { type MessageVariable } from "./MessageEditor";
+import MessageEditor, {
+  type MessageVariable,
+} from "./MessageEditor";
 import MessagePreview from "./MessagePreview";
 
 import {
@@ -24,11 +32,14 @@ import {
   type EntryMessageFormValues,
 } from "@/lib/features/campaign-builder/entryMessageSchema";
 
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "@/lib/hooks";
 
-import { cn } from "@/lib/utils";
 
-const DEFAULT_LINK_URL = "https://www.atrmajlesi.ir";
+const DEFAULT_LINK_URL =
+  "https://www.atrmajlesi.ir";
 
 const previewCustomer = {
   firstName: "سعید",
@@ -72,6 +83,7 @@ const messageVariables: readonly MessageVariable[] = [
   },
 ];
 
+
 function createDefaultMessage(): string {
   return `سلام ${previewCustomer.firstName} عزیز
 ورود شما را به باشگاه مشتریان ${previewCustomer.clubName} تبریک می‌گوییم
@@ -80,7 +92,11 @@ ${DEFAULT_LINK_URL}
 لغو11`;
 }
 
-function createPreviewMessage(message: string, linkUrl: string): string {
+
+function createPreviewMessage(
+  message: string,
+  linkUrl: string,
+): string {
   const values: Record<string, string> = {
     firstName: previewCustomer.firstName,
     lastName: previewCustomer.lastName,
@@ -91,49 +107,81 @@ function createPreviewMessage(message: string, linkUrl: string): string {
     link: linkUrl || DEFAULT_LINK_URL,
   };
 
-  const source = message.trim() || createDefaultMessage();
+  const source =
+    message.trim() ||
+    createDefaultMessage();
 
   return source.replace(
     /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g,
-    (originalToken: string, variableName: string) =>
-      values[variableName] ?? originalToken,
+    (
+      originalToken: string,
+      variableName: string,
+    ) =>
+      values[variableName] ??
+      originalToken,
   );
 }
+
 
 export default function EntryMessageStep() {
   const dispatch = useAppDispatch();
 
-  const savedEntryMessage = useAppSelector(selectEntryMessage);
+  const savedEntryMessage =
+    useAppSelector(
+      selectEntryMessage,
+    );
 
-  const [isPreviewOpen, setIsPreviewOpen] = useState(true);
+  const [
+    isPreviewOpen,
+    setIsPreviewOpen,
+  ] = useState(true);
 
-  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+  const [
+    isLinkDialogOpen,
+    setIsLinkDialogOpen,
+  ] = useState(false);
+
+
+  const methods =
+    useForm<EntryMessageFormValues>({
+      resolver: zodResolver(
+        entryMessageSchema,
+      ),
+
+      mode: "onSubmit",
+
+      defaultValues: {
+        isEnabled:
+          savedEntryMessage.isEnabled ??
+          true,
+
+        senderLineId:
+          savedEntryMessage.senderLineId ||
+          "1000000000",
+
+        message:
+          savedEntryMessage.message ||
+          createDefaultMessage(),
+
+        linkUrl:
+          savedEntryMessage.linkUrl ||
+          DEFAULT_LINK_URL,
+
+        uniqueLinkPerCustomer:
+          savedEntryMessage
+            .uniqueLinkPerCustomer ??
+          false,
+      },
+    });
+
 
   const {
     control,
-    handleSubmit,
     getValues,
     setValue,
-    clearErrors,
+    trigger,
+  } = methods;
 
-    formState: { errors },
-  } = useForm<EntryMessageFormValues>({
-    resolver: zodResolver(entryMessageSchema),
-
-    mode: "onBlur",
-
-    defaultValues: {
-      isEnabled: savedEntryMessage.isEnabled ?? true,
-
-      senderLineId: savedEntryMessage.senderLineId || "1000000000",
-
-      message: savedEntryMessage.message || createDefaultMessage(),
-
-      linkUrl: savedEntryMessage.linkUrl || DEFAULT_LINK_URL,
-
-      uniqueLinkPerCustomer: savedEntryMessage.uniqueLinkPerCustomer ?? false,
-    },
-  });
 
   const isEnabled =
     useWatch({
@@ -159,178 +207,241 @@ export default function EntryMessageStep() {
       name: "uniqueLinkPerCustomer",
     }) ?? false;
 
-  const previewMessage = useMemo(
-    () => createPreviewMessage(message, linkUrl),
-    [message, linkUrl],
-  );
 
-  const handleValidSubmit: SubmitHandler<EntryMessageFormValues> = (values) => {
-    dispatch(entryMessageSaved(values));
+  const previewMessage =
+    createPreviewMessage(
+      message,
+      linkUrl,
+    );
+
+
+  async function handleNext() {
+    const isValid =
+      await trigger();
+
+    if (!isValid) {
+      return;
+    }
+
+    dispatch(
+      entryMessageSaved(
+        getValues(),
+      ),
+    );
 
     dispatch(nextStep());
-  };
+  }
+
 
   function handleSaveDraft() {
-    dispatch(entryMessageSaved(getValues()));
+    dispatch(
+      entryMessageSaved(
+        getValues(),
+      ),
+    );
   }
+
 
   function handlePrevious() {
     dispatch(previousStep());
   }
 
-function insertTokenIntoMessage(
-  value: string,
-  start: number,
-  end: number,
-) {
-  const currentMessage =
-    getValues("message") ?? "";
 
-  const newMessage =
-    currentMessage.slice(0, start) +
-    value +
-    currentMessage.slice(end);
+  function insertTokenIntoMessage(
+    value: string,
+    start: number,
+    end: number,
+  ) {
+    const currentMessage =
+      getValues("message") ?? "";
 
-  setValue("message", newMessage, {
-    shouldDirty: true,
-  });
-}
+    const newMessage =
+      currentMessage.slice(0, start) +
+      value +
+      currentMessage.slice(end);
+
+    setValue(
+      "message",
+      newMessage,
+      {
+        shouldDirty: true,
+      },
+    );
+  }
+
 
   function handleAiRewrite() {
-    const currentLink = getValues("linkUrl") || DEFAULT_LINK_URL;
+    const currentLink =
+      getValues("linkUrl") ||
+      DEFAULT_LINK_URL;
 
-    const rewrittenMessage = `سلام ${previewCustomer.firstName} عزیز
+    const rewrittenMessage =
+      `سلام ${previewCustomer.firstName} عزیز
 ورود شما را به باشگاه مشتریان ${previewCustomer.clubName} تبریک می‌گوییم
 امتیاز شما در باشگاه ما: ${previewCustomer.points}
 ${currentLink}
 لغو11`;
 
-    setValue("message", rewrittenMessage, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
+    setValue(
+      "message",
+      rewrittenMessage,
+      {
+        shouldDirty: true,
+      },
+    );
   }
 
-  function handleAddLink(addedLink: AddedLink) {
-    const newUrl = addedLink.url.trim();
 
-    const oldUrl = getValues("linkUrl")?.trim() ?? "";
+  function handleAddLink(
+    addedLink: AddedLink,
+  ) {
+    const newUrl =
+      addedLink.url.trim();
 
-    const currentMessage = getValues("message") ?? "";
+    const oldUrl =
+      getValues(
+        "linkUrl",
+      )?.trim() ?? "";
 
-    let nextMessage = currentMessage;
+    let nextMessage =
+      getValues("message") ?? "";
 
-    if (nextMessage.includes("{{link}}")) {
-      nextMessage = nextMessage.replaceAll("{{link}}", newUrl);
-    } else if (oldUrl && nextMessage.includes(oldUrl)) {
-      nextMessage = nextMessage.replaceAll(oldUrl, newUrl);
+    if (
+      nextMessage.includes(
+        "{{link}}",
+      )
+    ) {
+      nextMessage =
+        nextMessage.replaceAll(
+          "{{link}}",
+          newUrl,
+        );
+    } else if (
+      oldUrl &&
+      nextMessage.includes(oldUrl)
+    ) {
+      nextMessage =
+        nextMessage.replaceAll(
+          oldUrl,
+          newUrl,
+        );
     } else {
       const separator =
-        nextMessage.length > 0 && !nextMessage.endsWith("\n") ? "\n" : "";
+        nextMessage.length > 0 &&
+        !nextMessage.endsWith("\n")
+          ? "\n"
+          : "";
 
-      nextMessage = `${nextMessage}${separator}${newUrl}`;
+      nextMessage =
+        `${nextMessage}${separator}${newUrl}`;
     }
 
-    setValue("linkUrl", newUrl, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
+    setValue(
+      "linkUrl",
+      newUrl,
+      {
+        shouldDirty: true,
+      },
+    );
 
-    setValue("uniqueLinkPerCustomer", addedLink.uniquePerCustomer, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
+    setValue(
+      "uniqueLinkPerCustomer",
+      addedLink.uniquePerCustomer,
+      {
+        shouldDirty: true,
+      },
+    );
 
-    setValue("message", nextMessage, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
+    setValue(
+      "message",
+      nextMessage,
+      {
+        shouldDirty: true,
+      },
+    );
 
     setIsLinkDialogOpen(false);
   }
 
+
   return (
-    <>
+    <FormProvider {...methods}>
       <form
-        onSubmit={handleSubmit(handleValidSubmit)}
         noValidate
-        className={cn(
-          /*
-           * Parent campaign header is 119px.
-           * 1382 - 119 = 1263px.
-           */
-          "relative",
-          "h-315.75",
-          "w-full",
-          "bg-white",
-        )}
+        className="relative h-315.75 w-full bg-surface"
       >
-        <main
-          className={cn(
-            /*
-             * Figma content:
-             * 999 × 1186
-             * padding-top: 64px
-             * horizontal padding: 100px
-             */
-            "h-296.5",
-            "w-full",
-            "px-6 pt-16",
-            "lg:px-25",
-          )}
-        >
-          <div
-            className={cn(
-              "mx-auto flex",
-              "h-280.5",
-              "w-full",
-              "max-w-199.75",
-              "flex-col",
-              "gap-8",
-            )}
-          >
+        <main className="h-296.5 w-full px-6 pt-16 lg:px-25">
+          <div className="mx-auto flex h-280.5 w-full max-w-199.75 flex-col gap-8">
             <MessageEditor
-              control={control}
-              errors={errors}
-              clearErrors={clearErrors}
               isEnabled={isEnabled}
               message={message}
-              variables={messageVariables}
-              onInsertToken={insertTokenIntoMessage}
-              onOpenLinkDialog={() => {
-                setIsLinkDialogOpen(true);
-              }}
-              onAiRewrite={handleAiRewrite}
+              variables={
+                messageVariables
+              }
+              onInsertToken={
+                insertTokenIntoMessage
+              }
+              onOpenLinkDialog={() =>
+                setIsLinkDialogOpen(
+                  true,
+                )
+              }
+              onAiRewrite={
+                handleAiRewrite
+              }
             />
 
             <MessagePreview
-              isOpen={isPreviewOpen}
-              isEnabled={isEnabled}
-              message={previewMessage}
-              onToggle={() => {
-                setIsPreviewOpen((current) => !current);
-              }}
+              isOpen={
+                isPreviewOpen
+              }
+              isEnabled={
+                isEnabled
+              }
+              message={
+                previewMessage
+              }
+              onToggle={() =>
+                setIsPreviewOpen(
+                  (current) =>
+                    !current,
+                )
+              }
             />
           </div>
         </main>
 
         <EntryMessageFooter
-          onPrevious={handlePrevious}
-          onSaveDraft={handleSaveDraft}
+          onPrevious={
+            handlePrevious
+          }
+          onSaveDraft={
+            handleSaveDraft
+          }
+          onNext={
+            handleNext
+          }
         />
       </form>
 
       <AddLinkDialog
-        open={isLinkDialogOpen}
-        initialUrl={linkUrl || "https://www.atrmajlesi.ir"}
-        initialUniquePerCustomer={uniqueLinkPerCustomer}
-        onOpenChange={setIsLinkDialogOpen}
-        onAddLink={handleAddLink}
+        open={
+          isLinkDialogOpen
+        }
+        initialUrl={
+          linkUrl ||
+          DEFAULT_LINK_URL
+        }
+        initialUniquePerCustomer={
+          uniqueLinkPerCustomer
+        }
+        onOpenChange={
+          setIsLinkDialogOpen
+        }
+        onAddLink={
+          handleAddLink
+        }
       />
-    </>
+    </FormProvider>
   );
 }

@@ -7,9 +7,7 @@ import {
 
 import {
   Controller,
-  type Control,
-  type FieldErrors,
-  type UseFormClearErrors,
+  useFormContext,
 } from "react-hook-form";
 
 import {
@@ -66,10 +64,6 @@ export interface MessageVariable {
 
 
 interface MessageEditorProps {
-  control: Control<EntryMessageFormValues>;
-  errors: FieldErrors<EntryMessageFormValues>;
-  clearErrors: UseFormClearErrors<EntryMessageFormValues>;
-
   isEnabled: boolean;
   message: string;
 
@@ -272,6 +266,7 @@ function SenderLineDropdown({
                     isSelected
                       ? "bg-primary-soft text-primary"
                       : "bg-surface text-text",
+
                     index <
                       senderLines.length -
                         1 &&
@@ -305,9 +300,6 @@ function SenderLineDropdown({
 
 
 export default function MessageEditor({
-  control,
-  errors,
-  clearErrors,
   isEnabled,
   message,
   variables,
@@ -315,49 +307,58 @@ export default function MessageEditor({
   onOpenLinkDialog,
   onAiRewrite,
 }: MessageEditorProps) {
+  const {
+    control,
+    clearErrors,
+    formState: { errors },
+  } =
+    useFormContext<EntryMessageFormValues>();
+
   const textareaRef =
-    useRef<HTMLTextAreaElement | null>(
-      null,
+    useRef<HTMLTextAreaElement | null>(null);
+
+
+  function handleInsertVariable(
+    variable: MessageVariable,
+  ) {
+    const textarea =
+      textareaRef.current;
+
+    if (!textarea) {
+      return;
+    }
+
+    const start =
+      textarea.selectionStart;
+
+    const end =
+      textarea.selectionEnd;
+
+    const value =
+      variableValues[variable.id] ??
+      variable.token;
+
+    const insertedValue =
+      `${value} `;
+
+    onInsertToken(
+      insertedValue,
+      start,
+      end,
     );
 
+    const nextPosition =
+      start + insertedValue.length;
 
- function handleInsertVariable(
-  variable: MessageVariable,
-) {
-  const textarea = textareaRef.current;
+    requestAnimationFrame(() => {
+      textarea.focus();
 
-  if (!textarea) {
-    return;
+      textarea.setSelectionRange(
+        nextPosition,
+        nextPosition,
+      );
+    });
   }
-
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-
-  const value =
-    variableValues[variable.id] ??
-    variable.token;
-
-  // The space is part of the inserted value
-  const insertedValue = `${value} `;
-
-  onInsertToken(
-    insertedValue,
-    start,
-    end,
-  );
-
-  const nextPosition =
-    start + insertedValue.length;
-
-  requestAnimationFrame(() => {
-    textarea.focus();
-
-    textarea.setSelectionRange(
-      nextPosition,
-      nextPosition,
-    );
-  });
-}
 
 
   return (
@@ -386,9 +387,9 @@ export default function MessageEditor({
             name="isEnabled"
             render={({ field }) => (
               <MessageToggle
-                checked={Boolean(
-                  field.value,
-                )}
+                checked={
+                  Boolean(field.value)
+                }
                 onCheckedChange={(
                   checked,
                 ) => {
@@ -444,8 +445,12 @@ export default function MessageEditor({
           name="senderLineId"
           render={({ field }) => (
             <SenderLineDropdown
-              value={field.value}
-              disabled={!isEnabled}
+              value={
+                field.value
+              }
+              disabled={
+                !isEnabled
+              }
               hasError={
                 !!errors.senderLineId
               }
@@ -482,6 +487,7 @@ export default function MessageEditor({
           className="h-10 w-39.5 rounded-2xl border-0 bg-[linear-gradient(90deg,#F0682D_0%,#F8BE3F_100%)] px-4 text-base font-bold leading-6 text-white shadow-[inset_-1.5px_-1.5px_1.5px_#ED591A] hover:opacity-90 disabled:opacity-40"
         >
           AI بازنویسی با
+
           <Sparkles className="size-5.5" />
         </Button>
       </div>
@@ -498,15 +504,11 @@ export default function MessageEditor({
               disabled={
                 !isEnabled
               }
-
-              // Important:
-              // keep textarea focused
               onMouseDown={(
                 event,
               ) => {
                 event.preventDefault();
               }}
-
               onClick={() =>
                 handleInsertVariable(
                   variable,

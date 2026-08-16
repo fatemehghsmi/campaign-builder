@@ -6,11 +6,15 @@ import { cn } from "@/lib/utils";
 interface EntryMessageFooterProps {
   onPrevious: () => void;
   onSaveDraft: () => void;
+  onNext: () => void;
 }
+
+
 
 export default function EntryMessageFooter({
   onPrevious,
   onSaveDraft,
+  onNext,
 }: EntryMessageFooterProps) {
   return (
     <footer
@@ -86,7 +90,8 @@ export default function EntryMessageFooter({
         </Button>
 
         <Button
-          type="submit"
+          type="button"
+          onClick={onNext}
           className={cn(
             "h-12",
             "w-[195.5px]",

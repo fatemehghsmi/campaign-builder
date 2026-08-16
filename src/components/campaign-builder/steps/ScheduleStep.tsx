@@ -13,7 +13,6 @@ import {
   Controller,
   useForm,
   useWatch,
-  type SubmitHandler,
 } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,10 +54,6 @@ const EMPTY_SCHEDULE: ScheduleFormValues = {
 };
 
 
-/* -------------------------------------------------------------------------- */
-/*                                  Helpers                                   */
-/* -------------------------------------------------------------------------- */
-
 function isoDateToLocalDate(
   value: string,
 ): Date | undefined {
@@ -80,7 +75,9 @@ function isoDateToLocalDate(
     day,
   );
 
-  return Number.isNaN(date.getTime())
+  return Number.isNaN(
+    date.getTime(),
+  )
     ? undefined
     : date;
 }
@@ -139,10 +136,6 @@ function normalizeTimeInput(
     .slice(0, 2);
 }
 
-
-/* -------------------------------------------------------------------------- */
-/*                                Date field                                  */
-/* -------------------------------------------------------------------------- */
 
 interface DateFieldProps {
   id: string;
@@ -235,30 +228,19 @@ function DateField({
             onClick={openCalendar}
             aria-invalid={!!error}
             className={cn(
-              "flex h-[52px] w-full items-center justify-between",
-              "rounded-2xl border bg-surface px-5 text-sm",
-              "transition hover:border-primary",
-              "focus:border-primary focus:outline-none",
-              "focus:ring-2 focus:ring-primary/15",
-
-              {
-                "border-danger":
-                  !!error,
-
-                "border-border-strong":
-                  !error,
-              },
+              "flex h-[52px] w-full items-center justify-between rounded-2xl border bg-surface px-5 text-sm transition hover:border-primary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15",
+              error
+                ? "border-danger"
+                : "border-border-strong",
             )}
           >
             <span
               dir="rtl"
-              className={cn({
-                "text-text":
-                  !!formattedValue,
-
-                "text-text-disabled":
-                  !formattedValue,
-              })}
+              className={
+                formattedValue
+                  ? "text-text"
+                  : "text-text-disabled"
+              }
             >
               {formattedValue ||
                 "انتخاب کنید"}
@@ -281,10 +263,6 @@ function DateField({
   );
 }
 
-
-/* -------------------------------------------------------------------------- */
-/*                                Time field                                  */
-/* -------------------------------------------------------------------------- */
 
 interface TimeSegmentProps {
   value: string;
@@ -340,30 +318,17 @@ function TimeSegment({
         onBlur();
       }}
       className={cn(
-        "h-12 rounded-2xl text-center shadow-none",
-        "placeholder:text-text-disabled",
-        "focus-visible:border-primary",
-        "focus-visible:ring-primary/15",
-
-        {
-          "border-danger":
-            hasError,
-
-          "border-border-strong":
-            !hasError,
-
-          "bg-background text-text-disabled":
-            disabled,
-        },
+        "h-12 rounded-2xl text-center shadow-none placeholder:text-text-disabled focus-visible:border-primary focus-visible:ring-primary/15",
+        hasError
+          ? "border-danger"
+          : "border-border-strong",
+        disabled &&
+          "bg-background text-text-disabled",
       )}
     />
   );
 }
 
-
-/* -------------------------------------------------------------------------- */
-/*                              Schedule step                                 */
-/* -------------------------------------------------------------------------- */
 
 export default function ScheduleStep() {
   const dispatch =
@@ -374,12 +339,13 @@ export default function ScheduleStep() {
       selectSchedule,
     ) ?? EMPTY_SCHEDULE;
 
+
   const {
     control,
-    handleSubmit,
     getValues,
     setValue,
     clearErrors,
+    trigger,
 
     formState: {
       errors,
@@ -389,21 +355,12 @@ export default function ScheduleStep() {
       scheduleSchema,
     ),
 
-    /*
-     * Validation starts only when
-     * the user submits the form.
-     */
     mode: "onSubmit",
-
-    /*
-     * After the first submit,
-     * errors update while fixing values.
-     */
-    reValidateMode: "onChange",
 
     defaultValues:
       savedSchedule,
   });
+
 
   const startDate =
     useWatch({
@@ -431,28 +388,14 @@ export default function ScheduleStep() {
     errors.endSecond?.message;
 
 
-  /* ------------------------------------------------------------------------ */
-  /*                              Next button                                 */
-  /* ------------------------------------------------------------------------ */
+  async function handleSaveDraft() {
+    const isValid =
+      await trigger();
 
-  const handleValidSubmit: SubmitHandler<
-    ScheduleFormValues
-  > = (values) => {
-    dispatch(
-      scheduleSaved(values),
-    );
+    if (!isValid) {
+      return;
+    }
 
-    dispatch(
-      nextStep(),
-    );
-  };
-
-
-  /* ------------------------------------------------------------------------ */
-  /*                              Save draft                                  */
-  /* ------------------------------------------------------------------------ */
-
-  function handleSaveDraft() {
     dispatch(
       scheduleSaved(
         getValues(),
@@ -461,9 +404,28 @@ export default function ScheduleStep() {
   }
 
 
-  /* ------------------------------------------------------------------------ */
-  /*                               End date                                   */
-  /* ------------------------------------------------------------------------ */
+  async function handleNext() {
+    const isValid =
+      await trigger();
+
+    if (!isValid) {
+      return;
+    }
+
+    dispatch(
+      scheduleSaved(
+        getValues(),
+      ),
+    );
+
+    dispatch(nextStep());
+  }
+
+
+  function handlePrevious() {
+    dispatch(previousStep());
+  }
+
 
   function handleEndDateChange(
     value: string,
@@ -504,9 +466,6 @@ export default function ScheduleStep() {
 
   return (
     <form
-      onSubmit={handleSubmit(
-        handleValidSubmit,
-      )}
       noValidate
       className="mx-auto flex min-h-[700px] w-full max-w-[800px] flex-col px-6 py-12"
     >
@@ -529,7 +488,9 @@ export default function ScheduleStep() {
               onChange={
                 field.onChange
               }
-              onBlur={field.onBlur}
+              onBlur={
+                field.onBlur
+              }
             />
           )}
         />
@@ -562,7 +523,9 @@ export default function ScheduleStep() {
                   onChange={
                     field.onChange
                   }
-                  onBlur={field.onBlur}
+                  onBlur={
+                    field.onBlur
+                  }
                 />
               )}
             />
@@ -584,7 +547,9 @@ export default function ScheduleStep() {
                   onChange={
                     field.onChange
                   }
-                  onBlur={field.onBlur}
+                  onBlur={
+                    field.onBlur
+                  }
                 />
               )}
             />
@@ -606,7 +571,9 @@ export default function ScheduleStep() {
                   onChange={
                     field.onChange
                   }
-                  onBlur={field.onBlur}
+                  onBlur={
+                    field.onBlur
+                  }
                 />
               )}
             />
@@ -648,7 +615,9 @@ export default function ScheduleStep() {
                   field.onChange,
                 );
               }}
-              onBlur={field.onBlur}
+              onBlur={
+                field.onBlur
+              }
             />
           )}
         />
@@ -680,7 +649,9 @@ export default function ScheduleStep() {
                   onChange={
                     field.onChange
                   }
-                  onBlur={field.onBlur}
+                  onBlur={
+                    field.onBlur
+                  }
                 />
               )}
             />
@@ -688,13 +659,9 @@ export default function ScheduleStep() {
             <span
               className={cn(
                 "text-lg",
-                {
-                  "text-text-disabled-strong":
-                    isEndTimeDisabled,
-
-                  "text-text-muted":
-                    !isEndTimeDisabled,
-                },
+                isEndTimeDisabled
+                  ? "text-text-disabled-strong"
+                  : "text-text-muted",
               )}
             >
               :
@@ -716,7 +683,9 @@ export default function ScheduleStep() {
                   onChange={
                     field.onChange
                   }
-                  onBlur={field.onBlur}
+                  onBlur={
+                    field.onBlur
+                  }
                 />
               )}
             />
@@ -724,13 +693,9 @@ export default function ScheduleStep() {
             <span
               className={cn(
                 "text-lg",
-                {
-                  "text-text-disabled-strong":
-                    isEndTimeDisabled,
-
-                  "text-text-muted":
-                    !isEndTimeDisabled,
-                },
+                isEndTimeDisabled
+                  ? "text-text-disabled-strong"
+                  : "text-text-muted",
               )}
             >
               :
@@ -752,7 +717,9 @@ export default function ScheduleStep() {
                   onChange={
                     field.onChange
                   }
-                  onBlur={field.onBlur}
+                  onBlur={
+                    field.onBlur
+                  }
                 />
               )}
             />
@@ -790,18 +757,19 @@ export default function ScheduleStep() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => {
-              dispatch(
-                previousStep(),
-              );
-            }}
+            onClick={
+              handlePrevious
+            }
             className="h-12 min-w-44 rounded-2xl border-border-strong bg-surface text-text"
           >
             قبلی
           </Button>
 
           <Button
-            type="submit"
+            type="button"
+            onClick={
+              handleNext
+            }
             className="h-12 min-w-44 rounded-2xl bg-primary font-bold text-white hover:bg-primary-hover"
           >
             ادامه

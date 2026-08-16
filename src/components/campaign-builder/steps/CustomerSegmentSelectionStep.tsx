@@ -9,19 +9,17 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
-
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import {
-  customerSegmentToggled,
+  customerSegmentsSaved,
   nextStep,
   previousStep,
   selectSelectedSegmentIds,
@@ -49,14 +47,9 @@ const persianNumberFormatter =
   new Intl.NumberFormat("fa-IR");
 
 
-/* -------------------------------------------------------------------------- */
-/*                               Segment icon                                 */
-/* -------------------------------------------------------------------------- */
-
 interface SegmentIconProps {
   icon: CustomerSegment["icon"];
 }
-
 
 function SegmentIcon({
   icon,
@@ -79,10 +72,6 @@ function SegmentIcon({
 }
 
 
-/* -------------------------------------------------------------------------- */
-/*                              Premium badge                                 */
-/* -------------------------------------------------------------------------- */
-
 function PremiumBadge() {
   return (
     <span
@@ -101,19 +90,11 @@ function PremiumBadge() {
 }
 
 
-/* -------------------------------------------------------------------------- */
-/*                              Segment card                                  */
-/* -------------------------------------------------------------------------- */
-
 interface CustomerSegmentCardProps {
   segment: CustomerSegment;
   isSelected: boolean;
-
-  onToggle: (
-    segmentId: string,
-  ) => void;
+  onToggle: (segmentId: string) => void;
 }
-
 
 function CustomerSegmentCard({
   segment,
@@ -161,18 +142,10 @@ function CustomerSegmentCard({
       >
         <Card
           className={cn(
-            "h-32.25 w-58 gap-0 overflow-hidden rounded-2xl",
-            "border-2 p-0 py-0 shadow-none",
-            "outline-none ring-0",
-            "transition-colors duration-200",
-
-            {
-              "border-primary bg-primary-soft":
-                isSelected,
-
-              "border-border bg-surface hover:border-primary":
-                !isSelected,
-            },
+            "h-32.25 w-58 gap-0 overflow-hidden rounded-2xl border-2 p-0 py-0 shadow-none outline-none ring-0 transition-colors duration-200",
+            isSelected
+              ? "border-primary bg-primary-soft"
+              : "border-border bg-surface hover:border-primary",
           )}
         >
           <CardContent className="flex h-full w-full items-center justify-center p-0">
@@ -202,14 +175,9 @@ function CustomerSegmentCard({
 }
 
 
-/* -------------------------------------------------------------------------- */
-/*                            New segment card                                */
-/* -------------------------------------------------------------------------- */
-
 interface NewSegmentCardProps {
   onClick: () => void;
 }
-
 
 function NewSegmentCard({
   onClick,
@@ -248,23 +216,27 @@ function NewSegmentCard({
 }
 
 
-/* -------------------------------------------------------------------------- */
-/*                              Main component                                */
-/* -------------------------------------------------------------------------- */
-
 export default function CustomerSegmentSelectionStep() {
   const dispatch =
     useAppDispatch();
 
-  const selectedSegmentIds =
+  const savedSelectedSegmentIds =
     useAppSelector(
       selectSelectedSegmentIds,
     ) ?? [];
 
   const [
+    selectedSegmentIds,
+    setSelectedSegmentIds,
+  ] = useState<string[]>(
+    savedSelectedSegmentIds,
+  );
+
+  const [
     searchText,
     setSearchText,
   ] = useState("");
+
 
   const normalizedSearch =
     searchText
@@ -282,6 +254,73 @@ export default function CustomerSegmentSelectionStep() {
               ),
         )
       : customerSegments;
+
+
+  function handleToggleSegment(
+    segmentId: string,
+  ) {
+    setSelectedSegmentIds(
+      (current) => {
+        if (
+          current.includes(
+            segmentId,
+          )
+        ) {
+          return current.filter(
+            (id) =>
+              id !== segmentId,
+          );
+        }
+
+        return [
+          ...current,
+          segmentId,
+        ];
+      },
+    );
+  }
+
+
+
+
+
+ function handleSaveDraft() {
+  if (selectedSegmentIds.length === 0) {
+    return;
+  }
+
+  dispatch(
+    customerSegmentsSaved(
+      selectedSegmentIds,
+    ),
+  );
+}
+
+ function handleContinue() {
+  if (selectedSegmentIds.length === 0) {
+    return;
+  }
+
+  dispatch(
+    customerSegmentsSaved(
+      selectedSegmentIds,
+    ),
+  );
+
+  dispatch(nextStep());
+}
+
+
+  function handlePrevious() {
+    dispatch(previousStep());
+  }
+
+
+  function handleCreateNewSegment() {
+    window.alert(
+      "ساخت سگمنت جدید را بعداً به API متصل می‌کنیم.",
+    );
+  }
 
 
   return (
@@ -350,7 +389,7 @@ export default function CustomerSegmentSelectionStep() {
             dir="rtl"
             className="w-full pb-6 lg:w-186.75"
           >
-            <div className="grid w-full content-start justify-center grid-cols-1 gap-6 py-0.5 sm:grid-cols-2 lg:min-h-112.5 lg:w-186.75 lg:grid-cols-[repeat(3,232px)]">
+            <div className="grid w-full content-start grid-cols-1 justify-center gap-6 py-0.5 sm:grid-cols-2 lg:min-h-112.5 lg:w-186.75 lg:grid-cols-[repeat(3,232px)]">
               {filteredSegments.map(
                 (segment) => (
                   <CustomerSegmentCard
@@ -361,25 +400,17 @@ export default function CustomerSegmentSelectionStep() {
                         segment.id,
                       )
                     }
-                    onToggle={(
-                      segmentId,
-                    ) => {
-                      dispatch(
-                        customerSegmentToggled(
-                          segmentId,
-                        ),
-                      );
-                    }}
+                    onToggle={
+                      handleToggleSegment
+                    }
                   />
                 ),
               )}
 
               <NewSegmentCard
-                onClick={() => {
-                  window.alert(
-                    "ساخت سگمنت جدید را بعداً به API متصل می‌کنیم.",
-                  );
-                }}
+                onClick={
+                  handleCreateNewSegment
+                }
               />
             </div>
 
@@ -402,7 +433,14 @@ export default function CustomerSegmentSelectionStep() {
         <Button
           type="button"
           variant="ghost"
-          className="h-12 w-41.25 rounded-2xl px-4 text-base font-bold leading-6 text-primary hover:bg-primary-soft hover:text-primary"
+          disabled={
+            selectedSegmentIds.length ===
+            0
+          }
+          onClick={
+            handleSaveDraft
+          }
+          className="h-12 w-41.25 rounded-2xl px-4 text-base font-bold leading-6 text-primary hover:bg-primary-soft hover:text-primary disabled:opacity-40"
         >
           ذخیره پیش‌نویس
         </Button>
@@ -411,11 +449,9 @@ export default function CustomerSegmentSelectionStep() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => {
-              dispatch(
-                previousStep(),
-              );
-            }}
+            onClick={
+              handlePrevious
+            }
             className="h-12 w-[195.5px] rounded-2xl border-2 border-border bg-surface text-base font-bold leading-6 text-text shadow-none hover:bg-surface hover:text-text"
           >
             قبلی
@@ -427,9 +463,9 @@ export default function CustomerSegmentSelectionStep() {
               selectedSegmentIds.length ===
               0
             }
-            onClick={() => {
-              dispatch(nextStep());
-            }}
+            onClick={
+              handleContinue
+            }
             className="h-12 w-[195.5px] rounded-2xl bg-primary text-base font-bold leading-6 text-white shadow-none hover:bg-primary-hover disabled:bg-primary disabled:opacity-40"
           >
             ادامه
